@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Finanzas</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-light">
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+
+        <a class="navbar-brand" th:href="@{/dashboard}">Asistente</a>
+
+        <div class="collapse navbar-collapse">
+
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" th:href="@{/dashboard}">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/tareas}">Tareas</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/habitos}">Hábitos</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/eventos}">Calendario</a></li>
+                <li class="nav-item"><a class="nav-link active" th:href="@{/finanzas}">Finanzas</a></li>
+            </ul>
+
+            <span class="navbar-text text-white me-3">
+                👤 <span sec:authentication="principal.username"></span>
+            </span>
+
+            <form th:action="@{/logout}" method="post">
+                <button class="btn btn-outline-light">Salir</button>
+            </form>
+
+        </div>
+    </div>
+</nav>
+
+<!-- CONTENIDO -->
+<div class="container mt-4">
+
+    <h2>💰 Finanzas</h2>
+
+    <!-- RESUMEN -->
+    <div class="row mb-3">
+
+        <div class="col-md-6">
+            <div class="card text-center shadow border-success">
+                <div class="card-body">
+                    <h5 class="text-success">Ingresos totales</h5>
+                    <h3 th:text="${totalIngresos} + ' €'"></h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card text-center shadow border-danger">
+                <div class="card-body">
+                    <h5 class="text-danger">Gastos totales</h5>
+                    <h3 th:text="${totalGastos} + ' €'"></h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- GRÁFICO -->
+    <div class="card p-3 mb-3">
+
+        <h5>Gasto por categoría</h5>
+
+        <div style="width: 280px; height: 280px; margin: auto;">
+            <canvas id="graficoCategorias"></canvas>
+        </div>
+
+    </div>
+
+    <!-- BARRAS DE PROGRESO -->
+    <div class="card p-3 mb-3">
+
+        <h5>Progreso por categoría</h5>
+
+        <div th:each="c : ${categorias}" class="mb-3">
+
+            <div th:with="
+                gastado=${gastoCategoria[c.idCategoria] != null ? gastoCategoria[c.idCategoria] : 0},
+                limite=${c.limiteMensual != null ? c.limiteMensual : 0},
+                ancho=${limite > 0 ? (gastado * 100 / limite) : 0}
+            ">
+
+                <!-- CABECERA -->
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <strong th:text="${c.nombre}"></strong>
+
+                    <div>
+                        <button class="btn btn-warning btn-sm"
+                                type="button"
+                                th:onclick="'mostrarEdicion(' + ${c.idCategoria} + ')'">
+                            Editar
+                        </button>
+
+                        <a th:href="@{/finanzas/categoria/eliminar/{id}(id=${c.idCategoria})}"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('¿Eliminar categoría?')">
+                            Eliminar
+                        </a>
+                    </div>
+
+                </div>
+
+                <!-- DINERO -->
+                <div class="d-flex justify-content-between">
+                    <span th:text="${gastado} + ' € / ' + ${limite} + ' €'"></span>
+                </div>
+
+                <!-- BARRA -->
+                <div class="progress mt-1">
+                    <div class="progress-bar"
+                         th:classappend="${ancho >= 100} ? 'bg-danger' :
+                                          (${ancho >= 70} ? 'bg-warning' : 'bg-success')"
+                         th:style="'width:' + (${ancho > 100 ? 100 : ancho}) + '%'">
+                    </div>
+                </div>
+
+                <!-- EDITAR -->
+                <div th:id="'editForm-' + ${c.idCategoria}" style="display:none;" class="mt-2">
+
+                    <form th:action="@{/finanzas/categoria/editar}" method="post" class="row g-2">
+
+                        <input type="hidden" name="idCategoria" th:value="${c.idCategoria}"/>
+
+                        <div class="col">
+                            <input type="text" name="nombre" th:value="${c.nombre}" class="form-control">
+                        </div>
+
+                        <div class="col">
+                            <input type="number" name="limiteMensual" th:value="${c.limiteMensual}" class="form-control">
+                        </div>
+
+                        <div class="col">
+                            <button class="btn btn-success btn-sm">Guardar</button>
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- CATEGORÍAS -->
+    <div class="card p-3 mb-3">
+
+        <h5>Crear categoría</h5>
+
+        <form th:action="@{/finanzas/categoria}" method="post" class="row g-2">
+
+            <div class="col">
+                <input type="text" name="nombre" class="form-control" required>
+            </div>
+
+            <div class="col">
+                <input type="number" name="limiteMensual" class="form-control" required>
+            </div>
+
+            <div class="col">
+                <button class="btn btn-primary w-100">Crear</button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- TRANSACCIONES -->
+    <div class="card p-3 mb-3">
+
+        <h5>Nueva transacción</h5>
+
+        <form th:action="@{/finanzas/guardar}" method="post" class="row g-2">
+
+            <div class="col">
+                <input type="text" name="titulo" class="form-control" required>
+            </div>
+
+            <div class="col">
+                <input type="number" step="0.01" name="cantidad" class="form-control" required>
+            </div>
+
+            <div class="col">
+                <input type="date" name="fecha" class="form-control" required>
+            </div>
+
+            <div class="col">
+                <select name="tipo" class="form-select">
+                    <option value="GASTO">Gasto</option>
+                    <option value="INGRESO">Ingreso</option>
+                </select>
+            </div>
+
+            <div class="col">
+                <select name="categoria.idCategoria" class="form-select">
+                    <option value="">Sin categoría</option>
+                    <option th:each="c : ${categorias}"
+                            th:value="${c.idCategoria}"
+                            th:text="${c.nombre}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="col">
+                <button class="btn btn-success w-100">Guardar</button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- LISTA -->
+    <div class="card p-3">
+
+        <h5>Movimientos</h5>
+
+        <table class="table table-striped">
+
+            <thead>
+            <tr>
+                <th>Título</th>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th>Fecha</th>
+                <th>Categoría</th>
+                <th></th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="t : ${transacciones}">
+                <td th:text="${t.titulo}"></td>
+                <td th:text="${t.tipo}"></td>
+                <td th:text="${t.cantidad}"></td>
+                <td th:text="${t.fecha}"></td>
+                <td th:text="${t.categoria != null ? t.categoria.nombre : '-'}"></td>
+
+                <td>
+                    <a th:href="@{/finanzas/eliminar/{id}(id=${t.idTransaccion})}"
+                       class="btn btn-danger btn-sm">
+                        Eliminar
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<!-- SCRIPT -->
+<script>
+    function mostrarEdicion(id) {
+        const form = document.getElementById('editForm-' + id);
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+</script>
+
+<script th:inline="javascript">
+
+    const datos = /*[[${porcentajeCategorias != null ? porcentajeCategorias : {}}]]*/ {};
+
+    const labels = Object.keys(datos);
+    const values = Object.values(datos);
+
+    new Chart(document.getElementById('graficoCategorias'), {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+</script>
+
+</body>
+</html>

@@ -81,17 +81,3 @@ No se pueden editar ni eliminar eventos de otros usuarios
 Variables sensibles
 Uso de archivo .env para almacenar claves (como API Key de IA)
 Añadido a .gitignore para evitar subir datos sensibles a GitHub
-Estado del proyecto
-
-El proyecto se encuentra en desarrollo, pero ya cuenta con funcionalidades avanzadas completamente operativas:
-
-Gestión completa de productividad
-Sistema financiero funcional
-Calendario interactivo
-Integración con inteligencia artificial
-
-Se seguirán añadiendo mejoras tanto a nivel visual como funcional, especialmente en:
-
-Experiencia de usuario
-Optimización del análisis con IA
-Nuevas funcionalidades de automatización

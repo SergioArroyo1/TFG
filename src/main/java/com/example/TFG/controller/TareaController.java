@@ -3,6 +3,7 @@ package com.example.TFG.controller;
 import com.example.TFG.modelo.Tarea;
 import com.example.TFG.modelo.Usuario;
 import com.example.TFG.service.AsistenteService;
+import com.example.TFG.service.IAService;
 import com.example.TFG.service.UsuarioService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -15,23 +16,22 @@ public class TareaController {
 
     private final AsistenteService service;
     private final UsuarioService usuarioService;
+    private final IAService iaService;
 
-    // Inyección de servicios necesarios para lógica de negocio y usuario
-    public TareaController(AsistenteService service, UsuarioService usuarioService) {
+    public TareaController(AsistenteService service, UsuarioService usuarioService, IAService iaService) {
         this.service = service;
         this.usuarioService = usuarioService;
+        this.iaService = iaService;
     }
 
     // ==================================================
-    // LISTAR TAREAS DEL USUARIO AUTENTICADO
+    // LISTAR TAREAS
     // ==================================================
     @GetMapping
     public String listar(Authentication auth, Model model) {
 
-        // Se obtiene el usuario actual a partir del email de login
         Usuario u = usuarioService.buscarPorEmail(auth.getName());
 
-        // Se cargan solo las tareas del usuario logueado
         model.addAttribute("tareas",
                 service.obtenerTareas(u.getIdUsuario()));
 
@@ -39,15 +39,31 @@ public class TareaController {
     }
 
     // ==================================================
-    // CREAR NUEVA TAREA
+    // IA ANALIZAR
+    // ==================================================
+    @GetMapping("/analizar")
+    public String analizar(Authentication auth, Model model) {
+
+        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+
+        var tareas = service.obtenerTareas(u.getIdUsuario());
+
+        String analisis = iaService.analizarTareas(tareas);
+
+        model.addAttribute("tareas", tareas);
+        model.addAttribute("analisisTareas", analisis);
+
+        return "tareas/lista";
+    }
+
+    // ==================================================
+    // CREAR
     // ==================================================
     @PostMapping("/crear")
     public String crear(Tarea t, Authentication auth) {
 
-        // Usuario autenticado que crea la tarea
         Usuario u = usuarioService.buscarPorEmail(auth.getName());
 
-        // IMPORTANTE: se asigna el usuario para evitar tareas sin propietario
         t.setUsuario(u);
 
         service.guardarTarea(t);
@@ -56,26 +72,39 @@ public class TareaController {
     }
 
     // ==================================================
-    // EDITAR TAREA
+    // EDITAR (PROTEGIDO)
     // ==================================================
     @GetMapping("/editar/{id}")
-    public String editar(@PathVariable Long id, Model model) {
+    public String editar(@PathVariable Long id, Authentication auth, Model model) {
 
-        // Se envía la tarea al formulario de edición
-        model.addAttribute("tarea", service.buscarTarea(id));
+        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+        Tarea t = service.buscarTarea(id);
+
+        // VALIDACIÓN DE SEGURIDAD
+        if (t == null || !t.getUsuario().getIdUsuario().equals(u.getIdUsuario())) {
+            return "redirect:/tareas?error=acceso-denegado";
+        }
+
+        model.addAttribute("tarea", t);
         return "tareas/editar";
     }
 
     // ==================================================
-    // ACTUALIZAR TAREA
+    // ACTUALIZAR (PROTEGIDO)
     // ==================================================
     @PostMapping("/actualizar")
     public String actualizar(Tarea t, Authentication auth) {
 
-        // Usuario autenticado
         Usuario u = usuarioService.buscarPorEmail(auth.getName());
 
-        t.setUsuario(u); // asegura la relacion con el usuario
+        Tarea original = service.buscarTarea(t.getIdTarea());
+
+        // VALIDACIÓN
+        if (original == null || !original.getUsuario().getIdUsuario().equals(u.getIdUsuario())) {
+            return "redirect:/tareas?error=acceso-denegado";
+        }
+
+        t.setUsuario(u);
 
         service.guardarTarea(t);
 
@@ -83,12 +112,21 @@ public class TareaController {
     }
 
     // ==================================================
-    // ELIMINAR TAREA
+    // ELIMINAR (PROTEGIDO)
     // ==================================================
     @GetMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Long id) {
+    public String eliminar(@PathVariable Long id, Authentication auth) {
+
+        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+        Tarea t = service.buscarTarea(id);
+
+        // VALIDACIÓN
+        if (t == null || !t.getUsuario().getIdUsuario().equals(u.getIdUsuario())) {
+            return "redirect:/tareas?error=acceso-denegado";
+        }
 
         service.eliminarTarea(id);
+
         return "redirect:/tareas";
     }
 }

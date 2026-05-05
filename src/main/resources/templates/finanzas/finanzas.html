@@ -44,6 +44,11 @@
 
     <h2>💰 Finanzas</h2>
 
+    <!-- IA BOTÓN -->
+    <form th:action="@{/finanzas/analizar}" method="get" class="mb-3">
+        <button class="btn btn-info">🧠 Analizar con IA</button>
+    </form>
+
     <!-- RESUMEN -->
     <div class="row mb-3">
 
@@ -64,6 +69,17 @@
                 </div>
             </div>
         </div>
+
+    </div>
+
+    <!-- RESULTADO IA -->
+    <div th:if="${iaFinanzas != null}" class="card p-3 mb-3 border-info">
+
+        <h5>🧠 Análisis IA</h5>
+
+        <pre style="white-space: pre-wrap; font-family: inherit;"
+             th:text="${iaFinanzas}">
+        </pre>
 
     </div>
 
@@ -91,7 +107,6 @@
                 ancho=${limite > 0 ? (gastado * 100 / limite) : 0}
             ">
 
-                <!-- CABECERA -->
                 <div class="d-flex justify-content-between align-items-center">
 
                     <strong th:text="${c.nombre}"></strong>
@@ -112,12 +127,10 @@
 
                 </div>
 
-                <!-- DINERO -->
                 <div class="d-flex justify-content-between">
                     <span th:text="${gastado} + ' € / ' + ${limite} + ' €'"></span>
                 </div>
 
-                <!-- BARRA -->
                 <div class="progress mt-1">
                     <div class="progress-bar"
                          th:classappend="${ancho >= 100} ? 'bg-danger' :
@@ -126,7 +139,6 @@
                     </div>
                 </div>
 
-                <!-- EDITAR -->
                 <div th:id="'editForm-' + ${c.idCategoria}" style="display:none;" class="mt-2">
 
                     <form th:action="@{/finanzas/categoria/editar}" method="post" class="row g-2">

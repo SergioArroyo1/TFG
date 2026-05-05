@@ -31,17 +31,14 @@
                     <a class="nav-link" th:href="@{/habitos}">Hábitos</a>
                 </li>
 
-                <!-- CALENDARIO -->
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/eventos}">Calendario</a>
                 </li>
 
-                <!-- FINANZAS -->
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/finanzas}">Finanzas</a>
                 </li>
 
-                <!-- ADMIN -->
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link" th:href="@{/admin}">Admin</a>
                 </li>
@@ -59,6 +56,19 @@
 <div class="container mt-4">
 
     <h2 class="mb-4">Mis Tareas</h2>
+
+    <!-- BOTÓN IA -->
+    <div class="mb-3">
+        <a th:href="@{/tareas/analizar}" class="btn btn-info">
+            🤖 Analizar tareas con IA
+        </a>
+    </div>
+
+    <!-- IA RESULTADO -->
+    <div class="alert alert-info mb-4" th:if="${analisisTareas != null}">
+        <strong>🤖 IA - Análisis de tareas:</strong>
+        <p class="mb-0" th:text="${analisisTareas}"></p>
+    </div>
 
     <!-- FORMULARIO CREAR -->
     <div class="card shadow p-4 mb-4">

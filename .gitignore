@@ -31,3 +31,15 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### ENV (IMPORTANTE)
+.env
+.env.*
+!.env.example
+
+### Logs (opcional pero recomendado)
+*.log
+
+### OS files
+.DS_Store
+Thumbs.db

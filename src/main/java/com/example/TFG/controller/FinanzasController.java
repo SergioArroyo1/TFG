@@ -2,11 +2,16 @@ package com.example.TFG.controller;
 
 import com.example.TFG.modelo.*;
 import com.example.TFG.service.AsistenteService;
+import com.example.TFG.service.IAService;
 import com.example.TFG.service.UsuarioService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/finanzas")
@@ -15,10 +20,13 @@ public class FinanzasController {
     private final AsistenteService service;
     private final UsuarioService usuarioService;
 
-    // Inyección de servicios: lógica de negocio y usuario autenticado
-    public FinanzasController(AsistenteService service, UsuarioService usuarioService) {
+    private final IAService iaService;
+
+    // Inyección de servicios
+    public FinanzasController(AsistenteService service, UsuarioService usuarioService, IAService iaService) {
         this.service = service;
         this.usuarioService = usuarioService;
+        this.iaService = iaService;
     }
 
     // ==================================================
@@ -27,40 +35,77 @@ public class FinanzasController {
     @GetMapping
     public String finanzas(Authentication auth, Model model) {
 
-        // Usuario actual obtenido desde sesión
         Usuario u = usuarioService.buscarPorEmail(auth.getName());
 
-        // ============================
-        // DATOS PRINCIPALES
-        // ============================
         model.addAttribute("transacciones",
                 service.obtenerTransacciones(u.getIdUsuario()));
 
         model.addAttribute("categorias",
                 service.obtenerCategorias(u.getIdUsuario()));
 
-        // Totales de ingresos y gastos (se usan en dashboard)
         model.addAttribute("totalIngresos",
                 service.totalIngresos(u.getIdUsuario()));
 
         model.addAttribute("totalGastos",
                 service.totalGastos(u.getIdUsuario()));
 
-        // usados distintas partes de la vista
         model.addAttribute("ingresos",
                 service.totalIngresos(u.getIdUsuario()));
 
         model.addAttribute("gastos",
                 service.totalGastos(u.getIdUsuario()));
 
-        // ============================
-        // ESTADÍSTICAS
-        // ============================
         model.addAttribute("porcentajeCategorias",
                 service.porcentajeGastoPorCategoria(u.getIdUsuario()));
 
         model.addAttribute("gastoCategoria",
                 service.gastoPorCategoria(u.getIdUsuario()));
+
+        return "finanzas/finanzas";
+    }
+
+    // ==================================================
+    // 🧠 ANALIZAR CON IA (NUEVO)
+    // ==================================================
+    @GetMapping("/analizar")
+    public String analizarIA(Authentication auth, Model model) {
+
+        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+
+        List<Categoria> categorias =
+                service.obtenerCategorias(u.getIdUsuario());
+
+        Map<Long, Double> gastoCategoria =
+                service.gastoPorCategoria(u.getIdUsuario());
+
+        // llamada a IA
+        String respuestaIA = iaService.analizarFinanzas(gastoCategoria, categorias);
+
+        // 🔹 reutilizamos TODO lo que ya usas
+        model.addAttribute("transacciones",
+                service.obtenerTransacciones(u.getIdUsuario()));
+
+        model.addAttribute("categorias", categorias);
+
+        model.addAttribute("totalIngresos",
+                service.totalIngresos(u.getIdUsuario()));
+
+        model.addAttribute("totalGastos",
+                service.totalGastos(u.getIdUsuario()));
+
+        model.addAttribute("ingresos",
+                service.totalIngresos(u.getIdUsuario()));
+
+        model.addAttribute("gastos",
+                service.totalGastos(u.getIdUsuario()));
+
+        model.addAttribute("porcentajeCategorias",
+                service.porcentajeGastoPorCategoria(u.getIdUsuario()));
+
+        model.addAttribute("gastoCategoria", gastoCategoria);
+
+        // resultado IA
+        model.addAttribute("iaFinanzas", respuestaIA);
 
         return "finanzas/finanzas";
     }
@@ -72,7 +117,6 @@ public class FinanzasController {
     public String guardar(@ModelAttribute Transaccion t,
                           Authentication auth) {
 
-        // Se asigna el usuario autenticado a la transacción
         Usuario u = usuarioService.buscarPorEmail(auth.getName());
         t.setUsuario(u);
 
@@ -88,7 +132,6 @@ public class FinanzasController {
     public String categoria(@ModelAttribute Categoria c,
                             Authentication auth) {
 
-        // Asignación de usuario propietario de la categoría
         Usuario u = usuarioService.buscarPorEmail(auth.getName());
         c.setUsuario(u);
 
@@ -103,13 +146,10 @@ public class FinanzasController {
     @PostMapping("/categoria/editar")
     public String editarCategoria(@ModelAttribute Categoria c, Authentication auth) {
 
-        // Usuario actual
         Usuario u = usuarioService.buscarPorEmail(auth.getName());
 
-        // Se recupera la categoría original desde BD
         Categoria existente = service.buscarCategoria(c.getIdCategoria());
 
-        // Se actualizan solo los campos modificables
         existente.setNombre(c.getNombre());
         existente.setLimiteMensual(c.getLimiteMensual());
         existente.setUsuario(u);

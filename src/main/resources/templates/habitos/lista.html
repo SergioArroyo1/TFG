@@ -31,17 +31,14 @@
                     <a class="nav-link active" th:href="@{/habitos}">Hábitos</a>
                 </li>
 
-                <!-- CALENDARIO -->
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/eventos}">Calendario</a>
                 </li>
 
-                <!-- FINANZAS -->
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/finanzas}">Finanzas</a>
                 </li>
 
-                <!-- ADMIN -->
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link" th:href="@{/admin}">Admin</a>
                 </li>
@@ -60,6 +57,19 @@
 
     <h2 class="mb-4">Mis Hábitos</h2>
 
+    <!-- BOTÓN IA -->
+    <div class="mb-3">
+        <a th:href="@{/habitos/analizar}" class="btn btn-success">
+            🧠 Analizar hábitos con IA
+        </a>
+    </div>
+
+    <!-- IA RESULTADO -->
+    <div class="alert alert-success mb-4" th:if="${analisisHabitos != null}">
+        <strong>🧠 IA - Análisis de hábitos:</strong>
+        <p class="mb-0" th:text="${analisisHabitos}"></p>
+    </div>
+
     <!-- FORMULARIO CREAR -->
     <div class="card shadow p-4 mb-4">
 
@@ -77,7 +87,7 @@
                 <input type="text" class="form-control" name="frecuencia" placeholder="Frecuencia" required />
             </div>
 
-            <!--  CSRF -->
+            <!-- CSRF -->
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
             <div class="col-md-2">

@@ -9,7 +9,8 @@ import java.time.LocalDate;
 
 @Entity
 @Data
-@NoArgsConstructor @AllArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class Evento {
 
     @Id
@@ -25,7 +26,10 @@ public class Evento {
     @Column(nullable = false)
     private LocalDate fecha;
 
-    // Relación con usuario (IGUAL QUE TAREA)
+    @Column(nullable = false)
+    private Boolean completado = false;
+
+    // Relación con usuario
     @ManyToOne
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;

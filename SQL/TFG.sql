@@ -143,10 +143,16 @@ VALUES
 
 
 -- 5. Eventos / Calendario
-INSERT INTO Evento (titulo, descripcion, fecha, id_usuario, id_tarea)
+INSERT INTO Evento (titulo, descripcion, fecha, completado, id_usuario, id_tarea, id_habito)
 VALUES
-    ('Reunión con tutor', 'Revisión de avances del TFG', '2026-03-10', 1, 2),
-    ('Entrega parcial', 'Subir avances a la plataforma', '2026-03-12', 1, 1);
+    ('Reunión con tutor', 'Revisión de avances del TFG', '2026-03-10', false, 1, 2, NULL),
+    ('Entrega parcial', 'Subir avances a la plataforma', '2026-03-12', false, 1, 1, NULL),
+
+    -- Evento asociado a hábito
+    ('Ir al gimnasio', 'Sesión de entrenamiento', '2026-03-11', false, 1, NULL, 1),
+
+    -- Evento sin relación
+    ('Descanso', 'Día libre', '2026-03-15', false, 1, NULL, NULL);
 
 
 INSERT INTO categoria (nombre, limite_mensual, id_usuario) VALUES

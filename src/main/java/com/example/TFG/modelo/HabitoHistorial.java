@@ -1,6 +1,7 @@
 package com.example.TFG.modelo;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ public class HabitoHistorial {
     private Habito habito;
 
     @Column(nullable = false)
+    @NotNull(message = "La fecha es obligatoria")
     private LocalDate fecha;
 
     @Column(nullable = false)

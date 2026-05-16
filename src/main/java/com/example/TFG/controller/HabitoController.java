@@ -5,9 +5,11 @@ import com.example.TFG.modelo.Usuario;
 import com.example.TFG.service.AsistenteService;
 import com.example.TFG.service.IAService;
 import com.example.TFG.service.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -62,19 +64,27 @@ public class HabitoController {
     // CREAR
     // ==================================================
     @PostMapping("/crear")
-    public String crear(Habito h, Authentication auth) {
+    public String crear(@Valid @ModelAttribute Habito h,
+                        BindingResult br,
+                        Authentication auth,
+                        Model model) {
 
         Usuario u = usuarioService.buscarPorEmail(auth.getName());
 
-        h.setUsuario(u);
+        if (br.hasErrors()) {
+            model.addAttribute("habitos",
+                    service.obtenerHabitos(u.getIdUsuario()));
+            return "habitos/lista";
+        }
 
+        h.setUsuario(u);
         service.guardarHabito(h);
 
         return "redirect:/habitos";
     }
 
     // ==================================================
-    // EDITAR (PROTEGIDO)
+    // EDITAR
     // ==================================================
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable Long id,
@@ -82,54 +92,52 @@ public class HabitoController {
                          Model model) {
 
         Usuario u = usuarioService.buscarPorEmail(auth.getName());
-        Habito h = service.buscarHabito(id);
 
-        // PROTECCIÓN
-        if (h == null || !h.getUsuario().getIdUsuario().equals(u.getIdUsuario())) {
-            return "redirect:/habitos?error=acceso-denegado";
-        }
+        // VALIDACIÓN CENTRALIZADA
+        service.validarHabito(id, u.getIdUsuario());
+
+        Habito h = service.buscarHabito(id);
 
         model.addAttribute("habito", h);
         return "habitos/editar";
     }
 
     // ==================================================
-    // ACTUALIZAR (PROTEGIDO)
+    // ACTUALIZAR
     // ==================================================
     @PostMapping("/actualizar")
-    public String actualizar(Habito h, Authentication auth) {
+    public String actualizar(@Valid @ModelAttribute Habito h,
+                             BindingResult br,
+                             Authentication auth,
+                             Model model) {
 
         Usuario u = usuarioService.buscarPorEmail(auth.getName());
 
-        Habito original = service.buscarHabito(h.getIdHabito());
+        // VALIDACIÓN CENTRALIZADA
+        service.validarHabito(h.getIdHabito(), u.getIdUsuario());
 
-        // PROTECCIÓN
-        if (original == null ||
-                !original.getUsuario().getIdUsuario().equals(u.getIdUsuario())) {
-            return "redirect:/habitos?error=acceso-denegado";
+        if (br.hasErrors()) {
+            model.addAttribute("habito", h);
+            return "habitos/editar";
         }
 
         h.setUsuario(u);
-
         service.guardarHabito(h);
 
         return "redirect:/habitos";
     }
 
     // ==================================================
-    // ELIMINAR (PROTEGIDO)
+    // ELIMINAR
     // ==================================================
     @GetMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id,
                            Authentication auth) {
 
         Usuario u = usuarioService.buscarPorEmail(auth.getName());
-        Habito h = service.buscarHabito(id);
 
-        // PROTECCIÓN
-        if (h == null || !h.getUsuario().getIdUsuario().equals(u.getIdUsuario())) {
-            return "redirect:/habitos?error=acceso-denegado";
-        }
+        // VALIDACIÓN CENTRALIZADA
+        service.validarHabito(id, u.getIdUsuario());
 
         service.eliminarHabito(id);
 

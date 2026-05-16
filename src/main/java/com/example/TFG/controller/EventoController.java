@@ -1,10 +1,9 @@
 package com.example.TFG.controller;
 
+import com.example.TFG.config.CurrentUser;
 import com.example.TFG.modelo.*;
 import com.example.TFG.service.AsistenteService;
 import com.example.TFG.service.IAService;
-import com.example.TFG.service.UsuarioService;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -17,14 +16,11 @@ import java.util.*;
 public class EventoController {
 
     private final AsistenteService service;
-    private final UsuarioService usuarioService;
     private final IAService iaService;
 
     public EventoController(AsistenteService service,
-                            UsuarioService usuarioService,
                             IAService iaService) {
         this.service = service;
-        this.usuarioService = usuarioService;
         this.iaService = iaService;
     }
 
@@ -32,13 +28,17 @@ public class EventoController {
     // CALENDARIO HTML
     // ======================
     @GetMapping
-    public String calendario(Authentication auth, Model model) {
+    public String calendario(@CurrentUser Usuario u,
+                             Model model) {
 
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+        model.addAttribute("eventos",
+                service.obtenerEventos(u.getIdUsuario()));
 
-        model.addAttribute("eventos", service.obtenerEventos(u.getIdUsuario()));
-        model.addAttribute("tareas", service.obtenerTareas(u.getIdUsuario()));
-        model.addAttribute("habitos", service.obtenerHabitos(u.getIdUsuario()));
+        model.addAttribute("tareas",
+                service.obtenerTareas(u.getIdUsuario()));
+
+        model.addAttribute("habitos",
+                service.obtenerHabitos(u.getIdUsuario()));
 
         return "eventos/calendario";
     }
@@ -48,11 +48,10 @@ public class EventoController {
     // ======================
     @GetMapping("/analizar")
     @ResponseBody
-    public String analizarEventosIA(Authentication auth) {
+    public String analizarEventosIA(@CurrentUser Usuario u) {
 
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
-
-        List<Evento> eventos = service.obtenerEventos(u.getIdUsuario());
+        List<Evento> eventos =
+                service.obtenerEventos(u.getIdUsuario());
 
         return iaService.analizarEventos(eventos);
     }
@@ -62,9 +61,7 @@ public class EventoController {
     // ======================
     @GetMapping("/json")
     @ResponseBody
-    public List<Map<String, Object>> json(Authentication auth) {
-
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+    public List<Map<String, Object>> json(@CurrentUser Usuario u) {
 
         List<Map<String, Object>> lista = new ArrayList<>();
 
@@ -108,27 +105,29 @@ public class EventoController {
     }
 
     // ======================
-    // CREAR / EDITAR EVENTO (SEGURIDAD CENTRALIZADA)
+    // CREAR / EDITAR EVENTO
     // ======================
     @PostMapping("/guardar-json")
     @ResponseBody
     public String guardar(@RequestBody Map<String, String> data,
-                          Authentication auth) {
-
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+                          @CurrentUser Usuario u) {
 
         Evento e;
 
-        if (data.get("idEvento") != null && !data.get("idEvento").isEmpty()) {
+        if (data.get("idEvento") != null &&
+                !data.get("idEvento").isEmpty()) {
 
-            Long idEvento = Long.parseLong(data.get("idEvento"));
+            Long idEvento =
+                    Long.parseLong(data.get("idEvento"));
 
             // VALIDACIÓN CENTRALIZADA
-            service.validarEvento(idEvento, u.getIdUsuario());
+            service.validarEvento(idEvento,
+                    u.getIdUsuario());
 
             e = service.buscarEvento(idEvento);
 
         } else {
+
             e = new Evento();
             e.setUsuario(u);
         }
@@ -137,25 +136,39 @@ public class EventoController {
         e.setDescripcion(data.get("descripcion"));
         e.setFecha(LocalDate.parse(data.get("fecha")));
 
-        e.setCompletado("true".equals(data.get("completado")));
+        e.setCompletado(
+                "true".equals(data.get("completado"))
+        );
 
         e.setTarea(null);
         e.setHabito(null);
 
-        if (data.get("idTarea") != null && !data.get("idTarea").isEmpty()) {
+        if (data.get("idTarea") != null &&
+                !data.get("idTarea").isEmpty()) {
 
-            Tarea t = service.buscarTarea(Long.parseLong(data.get("idTarea")));
+            Tarea t = service.buscarTarea(
+                    Long.parseLong(data.get("idTarea"))
+            );
 
-            if (t != null && t.getUsuario().getIdUsuario().equals(u.getIdUsuario())) {
+            if (t != null &&
+                    t.getUsuario().getIdUsuario()
+                            .equals(u.getIdUsuario())) {
+
                 e.setTarea(t);
             }
         }
 
-        if (data.get("idHabito") != null && !data.get("idHabito").isEmpty()) {
+        if (data.get("idHabito") != null &&
+                !data.get("idHabito").isEmpty()) {
 
-            Habito h = service.buscarHabito(Long.parseLong(data.get("idHabito")));
+            Habito h = service.buscarHabito(
+                    Long.parseLong(data.get("idHabito"))
+            );
 
-            if (h != null && h.getUsuario().getIdUsuario().equals(u.getIdUsuario())) {
+            if (h != null &&
+                    h.getUsuario().getIdUsuario()
+                            .equals(u.getIdUsuario())) {
+
                 e.setHabito(h);
             }
         }
@@ -166,14 +179,12 @@ public class EventoController {
     }
 
     // ======================
-    // ELIMINAR (SEGURIDAD CENTRALIZADA)
+    // ELIMINAR
     // ======================
     @DeleteMapping("/eliminar-json/{id}")
     @ResponseBody
     public String eliminar(@PathVariable Long id,
-                           Authentication auth) {
-
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+                           @CurrentUser Usuario u) {
 
         // VALIDACIÓN CENTRALIZADA
         service.validarEvento(id, u.getIdUsuario());

@@ -1,12 +1,12 @@
 package com.example.TFG.controller;
 
+import com.example.TFG.config.CurrentUser;
 import com.example.TFG.modelo.Tarea;
 import com.example.TFG.modelo.Usuario;
 import com.example.TFG.service.AsistenteService;
 import com.example.TFG.service.IAService;
 import com.example.TFG.service.UsuarioService;
 import jakarta.validation.Valid;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -32,9 +32,8 @@ public class TareaController {
     // LISTAR TAREAS
     // ==================================================
     @GetMapping
-    public String listar(Authentication auth, Model model) {
-
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+    public String listar(@CurrentUser Usuario u,
+                         Model model) {
 
         model.addAttribute("tareas",
                 service.obtenerTareas(u.getIdUsuario()));
@@ -46,9 +45,8 @@ public class TareaController {
     // IA ANALIZAR
     // ==================================================
     @GetMapping("/analizar")
-    public String analizar(Authentication auth, Model model) {
-
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+    public String analizar(@CurrentUser Usuario u,
+                           Model model) {
 
         var tareas = service.obtenerTareas(u.getIdUsuario());
 
@@ -66,18 +64,19 @@ public class TareaController {
     @PostMapping("/crear")
     public String crear(@Valid @ModelAttribute Tarea t,
                         BindingResult br,
-                        Authentication auth,
+                        @CurrentUser Usuario u,
                         Model model) {
 
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
-
         if (br.hasErrors()) {
+
             model.addAttribute("tareas",
                     service.obtenerTareas(u.getIdUsuario()));
+
             return "tareas/lista";
         }
 
         t.setUsuario(u);
+
         service.guardarTarea(t);
 
         return "redirect:/tareas";
@@ -88,17 +87,16 @@ public class TareaController {
     // ==================================================
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable Long id,
-                         Authentication auth,
+                         @CurrentUser Usuario u,
                          Model model) {
 
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
-
-        // VALIDACIÓN CENTRALIZADA EN SERVICE
+        // VALIDACIÓN CENTRALIZADA
         service.validarTarea(id, u.getIdUsuario());
 
         Tarea t = service.buscarTarea(id);
 
         model.addAttribute("tarea", t);
+
         return "tareas/editar";
     }
 
@@ -108,20 +106,21 @@ public class TareaController {
     @PostMapping("/actualizar")
     public String actualizar(@Valid @ModelAttribute Tarea t,
                              BindingResult br,
-                             Authentication auth,
+                             @CurrentUser Usuario u,
                              Model model) {
 
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
-
-        // VALIDACIÓN CENTRALIZADA EN SERVICE
+        // VALIDACIÓN CENTRALIZADA
         service.validarTarea(t.getIdTarea(), u.getIdUsuario());
 
         if (br.hasErrors()) {
+
             model.addAttribute("tarea", t);
+
             return "tareas/editar";
         }
 
         t.setUsuario(u);
+
         service.guardarTarea(t);
 
         return "redirect:/tareas";
@@ -132,11 +131,9 @@ public class TareaController {
     // ==================================================
     @GetMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id,
-                           Authentication auth) {
+                           @CurrentUser Usuario u) {
 
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
-
-        // VALIDACIÓN CENTRALIZADA EN SERVICE
+        // VALIDACIÓN CENTRALIZADA
         service.validarTarea(id, u.getIdUsuario());
 
         service.eliminarTarea(id);

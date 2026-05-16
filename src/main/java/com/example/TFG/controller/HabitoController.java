@@ -1,12 +1,11 @@
 package com.example.TFG.controller;
 
+import com.example.TFG.config.CurrentUser;
 import com.example.TFG.modelo.Habito;
 import com.example.TFG.modelo.Usuario;
 import com.example.TFG.service.AsistenteService;
 import com.example.TFG.service.IAService;
-import com.example.TFG.service.UsuarioService;
 import jakarta.validation.Valid;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,14 +16,11 @@ import org.springframework.web.bind.annotation.*;
 public class HabitoController {
 
     private final AsistenteService service;
-    private final UsuarioService usuarioService;
     private final IAService iaService;
 
     public HabitoController(AsistenteService service,
-                            UsuarioService usuarioService,
                             IAService iaService) {
         this.service = service;
-        this.usuarioService = usuarioService;
         this.iaService = iaService;
     }
 
@@ -32,12 +28,11 @@ public class HabitoController {
     // LISTAR HÁBITOS
     // ==================================================
     @GetMapping
-    public String listar(Authentication auth, Model model) {
-
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+    public String listar(@CurrentUser Usuario usuario,
+                         Model model) {
 
         model.addAttribute("habitos",
-                service.obtenerHabitos(u.getIdUsuario()));
+                service.obtenerHabitos(usuario.getIdUsuario()));
 
         return "habitos/lista";
     }
@@ -46,11 +41,10 @@ public class HabitoController {
     // IA ANALIZAR HÁBITOS
     // ==================================================
     @GetMapping("/analizar")
-    public String analizar(Authentication auth, Model model) {
+    public String analizar(@CurrentUser Usuario usuario,
+                           Model model) {
 
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
-
-        var habitos = service.obtenerHabitos(u.getIdUsuario());
+        var habitos = service.obtenerHabitos(usuario.getIdUsuario());
 
         String analisis = iaService.analizarHabitos(habitos);
 
@@ -64,21 +58,22 @@ public class HabitoController {
     // CREAR
     // ==================================================
     @PostMapping("/crear")
-    public String crear(@Valid @ModelAttribute Habito h,
+    public String crear(@Valid @ModelAttribute Habito habito,
                         BindingResult br,
-                        Authentication auth,
+                        @CurrentUser Usuario usuario,
                         Model model) {
 
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
-
         if (br.hasErrors()) {
+
             model.addAttribute("habitos",
-                    service.obtenerHabitos(u.getIdUsuario()));
+                    service.obtenerHabitos(usuario.getIdUsuario()));
+
             return "habitos/lista";
         }
 
-        h.setUsuario(u);
-        service.guardarHabito(h);
+        habito.setUsuario(usuario);
+
+        service.guardarHabito(habito);
 
         return "redirect:/habitos";
     }
@@ -88,17 +83,16 @@ public class HabitoController {
     // ==================================================
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable Long id,
-                         Authentication auth,
+                         @CurrentUser Usuario usuario,
                          Model model) {
 
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
-
         // VALIDACIÓN CENTRALIZADA
-        service.validarHabito(id, u.getIdUsuario());
+        service.validarHabito(id, usuario.getIdUsuario());
 
-        Habito h = service.buscarHabito(id);
+        Habito habito = service.buscarHabito(id);
 
-        model.addAttribute("habito", h);
+        model.addAttribute("habito", habito);
+
         return "habitos/editar";
     }
 
@@ -106,23 +100,25 @@ public class HabitoController {
     // ACTUALIZAR
     // ==================================================
     @PostMapping("/actualizar")
-    public String actualizar(@Valid @ModelAttribute Habito h,
+    public String actualizar(@Valid @ModelAttribute Habito habito,
                              BindingResult br,
-                             Authentication auth,
+                             @CurrentUser Usuario usuario,
                              Model model) {
 
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
-
         // VALIDACIÓN CENTRALIZADA
-        service.validarHabito(h.getIdHabito(), u.getIdUsuario());
+        service.validarHabito(
+                habito.getIdHabito(),
+                usuario.getIdUsuario()
+        );
 
         if (br.hasErrors()) {
-            model.addAttribute("habito", h);
+            model.addAttribute("habito", habito);
             return "habitos/editar";
         }
 
-        h.setUsuario(u);
-        service.guardarHabito(h);
+        habito.setUsuario(usuario);
+
+        service.guardarHabito(habito);
 
         return "redirect:/habitos";
     }
@@ -132,12 +128,10 @@ public class HabitoController {
     // ==================================================
     @GetMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id,
-                           Authentication auth) {
-
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+                           @CurrentUser Usuario usuario) {
 
         // VALIDACIÓN CENTRALIZADA
-        service.validarHabito(id, u.getIdUsuario());
+        service.validarHabito(id, usuario.getIdUsuario());
 
         service.eliminarHabito(id);
 

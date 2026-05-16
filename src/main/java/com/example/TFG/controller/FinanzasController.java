@@ -1,11 +1,12 @@
 package com.example.TFG.controller;
 
-import com.example.TFG.modelo.*;
+import com.example.TFG.config.CurrentUser;
+import com.example.TFG.modelo.Categoria;
+import com.example.TFG.modelo.Transaccion;
+import com.example.TFG.modelo.Usuario;
 import com.example.TFG.service.AsistenteService;
 import com.example.TFG.service.IAService;
-import com.example.TFG.service.UsuarioService;
 import jakarta.validation.Valid;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,14 +20,11 @@ import java.util.Map;
 public class FinanzasController {
 
     private final AsistenteService service;
-    private final UsuarioService usuarioService;
     private final IAService iaService;
 
     public FinanzasController(AsistenteService service,
-                              UsuarioService usuarioService,
                               IAService iaService) {
         this.service = service;
-        this.usuarioService = usuarioService;
         this.iaService = iaService;
     }
 
@@ -34,33 +32,34 @@ public class FinanzasController {
     // VISTA PRINCIPAL
     // ==================================================
     @GetMapping
-    public String finanzas(Authentication auth, Model model) {
+    public String finanzas(@CurrentUser Usuario usuario,
+                           Model model) {
 
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+        Long usuarioId = usuario.getIdUsuario();
 
         model.addAttribute("transacciones",
-                service.obtenerTransacciones(u.getIdUsuario()));
+                service.obtenerTransacciones(usuarioId));
 
         model.addAttribute("categorias",
-                service.obtenerCategorias(u.getIdUsuario()));
+                service.obtenerCategorias(usuarioId));
 
         model.addAttribute("totalIngresos",
-                service.totalIngresos(u.getIdUsuario()));
+                service.totalIngresos(usuarioId));
 
         model.addAttribute("totalGastos",
-                service.totalGastos(u.getIdUsuario()));
+                service.totalGastos(usuarioId));
 
         model.addAttribute("ingresos",
-                service.totalIngresos(u.getIdUsuario()));
+                service.totalIngresos(usuarioId));
 
         model.addAttribute("gastos",
-                service.totalGastos(u.getIdUsuario()));
+                service.totalGastos(usuarioId));
 
         model.addAttribute("porcentajeCategorias",
-                service.porcentajeGastoPorCategoria(u.getIdUsuario()));
+                service.porcentajeGastoPorCategoria(usuarioId));
 
         model.addAttribute("gastoCategoria",
-                service.gastoPorCategoria(u.getIdUsuario()));
+                service.gastoPorCategoria(usuarioId));
 
         return "finanzas/finanzas";
     }
@@ -69,29 +68,40 @@ public class FinanzasController {
     // IA ANALISIS
     // ==================================================
     @GetMapping("/analizar")
-    public String analizarIA(Authentication auth, Model model) {
+    public String analizarIA(@CurrentUser Usuario usuario,
+                             Model model) {
 
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+        Long usuarioId = usuario.getIdUsuario();
 
         List<Categoria> categorias =
-                service.obtenerCategorias(u.getIdUsuario());
+                service.obtenerCategorias(usuarioId);
 
         Map<Long, Double> gastoCategoria =
-                service.gastoPorCategoria(u.getIdUsuario());
+                service.gastoPorCategoria(usuarioId);
 
         String respuestaIA =
                 iaService.analizarFinanzas(gastoCategoria, categorias);
 
         model.addAttribute("transacciones",
-                service.obtenerTransacciones(u.getIdUsuario()));
+                service.obtenerTransacciones(usuarioId));
 
         model.addAttribute("categorias", categorias);
-        model.addAttribute("totalIngresos", service.totalIngresos(u.getIdUsuario()));
-        model.addAttribute("totalGastos", service.totalGastos(u.getIdUsuario()));
-        model.addAttribute("ingresos", service.totalIngresos(u.getIdUsuario()));
-        model.addAttribute("gastos", service.totalGastos(u.getIdUsuario()));
+
+        model.addAttribute("totalIngresos",
+                service.totalIngresos(usuarioId));
+
+        model.addAttribute("totalGastos",
+                service.totalGastos(usuarioId));
+
+        model.addAttribute("ingresos",
+                service.totalIngresos(usuarioId));
+
+        model.addAttribute("gastos",
+                service.totalGastos(usuarioId));
+
         model.addAttribute("porcentajeCategorias",
-                service.porcentajeGastoPorCategoria(u.getIdUsuario()));
+                service.porcentajeGastoPorCategoria(usuarioId));
+
         model.addAttribute("gastoCategoria", gastoCategoria);
 
         model.addAttribute("iaFinanzas", respuestaIA);
@@ -103,23 +113,27 @@ public class FinanzasController {
     // GUARDAR TRANSACCION
     // ==================================================
     @PostMapping("/guardar")
-    public String guardar(@Valid @ModelAttribute Transaccion t,
+    public String guardar(@Valid @ModelAttribute Transaccion transaccion,
                           BindingResult br,
-                          Authentication auth,
+                          @CurrentUser Usuario usuario,
                           Model model) {
 
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+        Long usuarioId = usuario.getIdUsuario();
 
         if (br.hasErrors()) {
+
             model.addAttribute("transacciones",
-                    service.obtenerTransacciones(u.getIdUsuario()));
+                    service.obtenerTransacciones(usuarioId));
+
             model.addAttribute("categorias",
-                    service.obtenerCategorias(u.getIdUsuario()));
+                    service.obtenerCategorias(usuarioId));
+
             return "finanzas/finanzas";
         }
 
-        t.setUsuario(u);
-        service.guardarTransaccion(t);
+        transaccion.setUsuario(usuario);
+
+        service.guardarTransaccion(transaccion);
 
         return "redirect:/finanzas";
     }
@@ -128,23 +142,27 @@ public class FinanzasController {
     // CREAR CATEGORIA
     // ==================================================
     @PostMapping("/categoria")
-    public String categoria(@Valid @ModelAttribute Categoria c,
+    public String categoria(@Valid @ModelAttribute Categoria categoria,
                             BindingResult br,
-                            Authentication auth,
+                            @CurrentUser Usuario usuario,
                             Model model) {
 
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+        Long usuarioId = usuario.getIdUsuario();
 
         if (br.hasErrors()) {
+
             model.addAttribute("transacciones",
-                    service.obtenerTransacciones(u.getIdUsuario()));
+                    service.obtenerTransacciones(usuarioId));
+
             model.addAttribute("categorias",
-                    service.obtenerCategorias(u.getIdUsuario()));
+                    service.obtenerCategorias(usuarioId));
+
             return "finanzas/finanzas";
         }
 
-        c.setUsuario(u);
-        service.guardarCategoria(c);
+        categoria.setUsuario(usuario);
+
+        service.guardarCategoria(categoria);
 
         return "redirect:/finanzas";
     }
@@ -153,29 +171,37 @@ public class FinanzasController {
     // EDITAR CATEGORIA (SEGURIDAD CENTRALIZADA)
     // ==================================================
     @PostMapping("/categoria/editar")
-    public String editarCategoria(@Valid @ModelAttribute Categoria c,
-                                  BindingResult br,
-                                  Authentication auth,
-                                  Model model) {
+    public String editarCategoria(
+            @Valid @ModelAttribute Categoria categoria,
+            BindingResult br,
+            @CurrentUser Usuario usuario,
+            Model model) {
 
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+        Long usuarioId = usuario.getIdUsuario();
 
         // VALIDACIÓN CENTRALIZADA
-        service.validarCategoria(c.getIdCategoria(), u.getIdUsuario());
+        service.validarCategoria(
+                categoria.getIdCategoria(),
+                usuarioId
+        );
 
         if (br.hasErrors()) {
+
             model.addAttribute("transacciones",
-                    service.obtenerTransacciones(u.getIdUsuario()));
+                    service.obtenerTransacciones(usuarioId));
+
             model.addAttribute("categorias",
-                    service.obtenerCategorias(u.getIdUsuario()));
+                    service.obtenerCategorias(usuarioId));
+
             return "finanzas/finanzas";
         }
 
-        Categoria existente = service.buscarCategoria(c.getIdCategoria());
+        Categoria existente =
+                service.buscarCategoria(categoria.getIdCategoria());
 
-        existente.setNombre(c.getNombre());
-        existente.setLimiteMensual(c.getLimiteMensual());
-        existente.setUsuario(u);
+        existente.setNombre(categoria.getNombre());
+        existente.setLimiteMensual(categoria.getLimiteMensual());
+        existente.setUsuario(usuario);
 
         service.guardarCategoria(existente);
 
@@ -187,12 +213,10 @@ public class FinanzasController {
     // ==================================================
     @GetMapping("/categoria/eliminar/{id}")
     public String eliminarCategoria(@PathVariable Long id,
-                                    Authentication auth) {
-
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+                                    @CurrentUser Usuario usuario) {
 
         // VALIDACIÓN CENTRALIZADA
-        service.validarCategoria(id, u.getIdUsuario());
+        service.validarCategoria(id, usuario.getIdUsuario());
 
         service.eliminarCategoria(id);
 
@@ -204,12 +228,10 @@ public class FinanzasController {
     // ==================================================
     @GetMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id,
-                           Authentication auth) {
-
-        Usuario u = usuarioService.buscarPorEmail(auth.getName());
+                           @CurrentUser Usuario usuario) {
 
         // VALIDACIÓN CENTRALIZADA
-        service.validarTransaccion(id, u.getIdUsuario());
+        service.validarTransaccion(id, usuario.getIdUsuario());
 
         service.eliminarTransaccion(id);
 

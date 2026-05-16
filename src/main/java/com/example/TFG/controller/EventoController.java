@@ -108,7 +108,7 @@ public class EventoController {
     }
 
     // ======================
-    // CREAR / EDITAR EVENTO (SEGURIZADO)
+    // CREAR / EDITAR EVENTO (SEGURIDAD CENTRALIZADA)
     // ======================
     @PostMapping("/guardar-json")
     @ResponseBody
@@ -119,14 +119,14 @@ public class EventoController {
 
         Evento e;
 
-        // SEGURIDAD: validar ownership en edición
         if (data.get("idEvento") != null && !data.get("idEvento").isEmpty()) {
 
-            e = service.buscarEvento(Long.parseLong(data.get("idEvento")));
+            Long idEvento = Long.parseLong(data.get("idEvento"));
 
-            if (e == null || !e.getUsuario().getIdUsuario().equals(u.getIdUsuario())) {
-                return "forbidden";
-            }
+            // VALIDACIÓN CENTRALIZADA
+            service.validarEvento(idEvento, u.getIdUsuario());
+
+            e = service.buscarEvento(idEvento);
 
         } else {
             e = new Evento();
@@ -146,7 +146,6 @@ public class EventoController {
 
             Tarea t = service.buscarTarea(Long.parseLong(data.get("idTarea")));
 
-            // seguridad: tarea debe pertenecer al usuario
             if (t != null && t.getUsuario().getIdUsuario().equals(u.getIdUsuario())) {
                 e.setTarea(t);
             }
@@ -156,7 +155,6 @@ public class EventoController {
 
             Habito h = service.buscarHabito(Long.parseLong(data.get("idHabito")));
 
-            // seguridad: hábito debe pertenecer al usuario
             if (h != null && h.getUsuario().getIdUsuario().equals(u.getIdUsuario())) {
                 e.setHabito(h);
             }
@@ -168,7 +166,7 @@ public class EventoController {
     }
 
     // ======================
-    // ELIMINAR (SEGURIZADO)
+    // ELIMINAR (SEGURIDAD CENTRALIZADA)
     // ======================
     @DeleteMapping("/eliminar-json/{id}")
     @ResponseBody
@@ -177,12 +175,8 @@ public class EventoController {
 
         Usuario u = usuarioService.buscarPorEmail(auth.getName());
 
-        Evento e = service.buscarEvento(id);
-
-        // SEGURIDAD CRÍTICA
-        if (e == null || !e.getUsuario().getIdUsuario().equals(u.getIdUsuario())) {
-            return "forbidden";
-        }
+        // VALIDACIÓN CENTRALIZADA
+        service.validarEvento(id, u.getIdUsuario());
 
         service.eliminarEvento(id);
 

@@ -1,13 +1,14 @@
 package com.example.TFG.service;
 
-import com.example.TFG.modelo.Categoria;
-import com.example.TFG.modelo.Evento;
-import com.example.TFG.modelo.Tarea;
+import com.example.TFG.modelo.*;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.util.retry.Retry;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -18,25 +19,20 @@ public class IAService {
     @Value("${GEMINI_API_KEY}")
     private String apiKey;
 
-    private final String URL ="https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
+    private final WebClient webClient;
 
-    // =========================
-    // LIMPIADOR GLOBAL IA
-    // =========================
-    private String limpiarRespuesta(String text) {
+    private final String URL =
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
 
-        if (text == null) return "";
-
-        return text
-                .replaceAll("\\*", "")   // quita asteriscos
-                .replaceAll("#+", "")    // quita hashtags ### ##
-                .replaceAll("\\s+", " ") // limpia espacios dobles
-                .trim();
+    public IAService() {
+        this.webClient = WebClient.builder()
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .build();
     }
 
-    // =========================
+    // ==================================================
     // FINANZAS
-    // =========================
+    // ==================================================
     public String analizarFinanzas(Map<Long, Double> gastoCategoria,
                                    List<Categoria> categorias) {
 
@@ -58,18 +54,17 @@ public class IAService {
                     .append("€\n");
         }
 
-        return limpiarRespuesta(llamarGemini(prompt.toString()));
+        return llamarGemini(prompt.toString());
     }
 
-    // =========================
+    // ==================================================
     // TAREAS
-    // =========================
+    // ==================================================
     public String analizarTareas(List<Tarea> tareas) {
 
         StringBuilder prompt = new StringBuilder();
 
-        prompt.append("Analiza estas tareas y dime cuáles son más prioritarias.\n")
-                .append("Devuelve un ranking claro y breve.\n\n");
+        prompt.append("Analiza estas tareas y priorízalas:\n\n");
 
         for (Tarea t : tareas) {
             prompt.append("- ")
@@ -81,103 +76,116 @@ public class IAService {
                     .append("\n");
         }
 
-        return limpiarRespuesta(llamarGemini(prompt.toString()));
+        return llamarGemini(prompt.toString());
     }
 
-    // =========================
-    // HÁBITOS
-    // =========================
-    public String analizarHabitos(List<com.example.TFG.modelo.Habito> habitos) {
+    // ==================================================
+    // HABITOS
+    // ==================================================
+    public String analizarHabitos(List<Habito> habitos) {
 
         StringBuilder prompt = new StringBuilder();
 
-        prompt.append("Analiza estos hábitos de un usuario y responde de forma clara:\n\n");
+        prompt.append("Analiza estos hábitos:\n\n");
 
-        for (var h : habitos) {
-
-            prompt.append("- Hábito: ")
+        for (Habito h : habitos) {
+            prompt.append("- ")
                     .append(h.getNombre())
                     .append(" | Frecuencia: ")
                     .append(h.getFrecuencia())
                     .append("\n");
         }
 
-        prompt.append("\nDime:\n")
-                .append("- cuáles son buenos\n")
-                .append("- cuáles son inconsistentes\n")
-                .append("- recomendaciones para mejorar\n");
-
-        return limpiarRespuesta(llamarGemini(prompt.toString()));
+        return llamarGemini(prompt.toString());
     }
 
-    // =========================
+    // ==================================================
     // EVENTOS
-    // =========================
+    // ==================================================
     public String analizarEventos(List<Evento> eventos) {
 
         StringBuilder prompt = new StringBuilder();
 
-        prompt.append("Analiza estos eventos personales y dame:\n");
-        prompt.append("- Nivel de productividad\n");
-        prompt.append("- Eventos completados vs pendientes\n");
-        prompt.append("- Recomendaciones claras\n\n");
+        prompt.append("Analiza estos eventos personales:\n\n");
 
         for (Evento e : eventos) {
             prompt.append("- ")
                     .append(e.getTitulo())
-                    .append(" | Fecha: ").append(e.getFecha())
-                    .append(" | Completado: ").append(e.getCompletado())
+                    .append(" | Fecha: ")
+                    .append(e.getFecha())
+                    .append(" | Completado: ")
+                    .append(e.getCompletado())
                     .append("\n");
         }
 
-        return limpiarRespuesta(llamarGemini(prompt.toString()));
+        return llamarGemini(prompt.toString());
     }
 
-    // =========================
-    // GEMINI CORE
-    // =========================
+    // ==================================================
+    // GEMINI (ROBUSTO)
+    // ==================================================
     private String llamarGemini(String prompt) {
 
         try {
-            RestTemplate restTemplate = new RestTemplate();
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            Map<String, Object> textPart = Map.of("text", prompt);
-
-            Map<String, Object> content = Map.of(
-                    "parts", List.of(textPart)
-            );
-
             Map<String, Object> body = Map.of(
-                    "contents", List.of(content)
+                    "contents", List.of(
+                            Map.of(
+                                    "parts", List.of(
+                                            Map.of("text", prompt)
+                                    )
+                            )
+                    )
             );
 
-            String urlFinal = URL + "?key=" + apiKey;
+            GeminiResponse response = webClient.post()
+                    .uri(URL + "?key=" + apiKey)
+                    .header("x-goog-api-key", apiKey)
+                    .bodyValue(body)
+                    .retrieve()
+                    .bodyToMono(GeminiResponse.class)
+                    .timeout(Duration.ofSeconds(30))
+                    .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)))
+                    .block();
 
-            HttpEntity<Map<String, Object>> request =
-                    new HttpEntity<>(body, headers);
+            if (response == null ||
+                    response.candidates == null ||
+                    response.candidates.isEmpty()) {
 
-            ResponseEntity<Map> response =
-                    restTemplate.postForEntity(urlFinal, request, Map.class);
-
-            Map responseBody = response.getBody();
-
-            if (responseBody == null) {
-                return "Sin respuesta de Gemini";
+                return "No se pudo generar un análisis en este momento.";
             }
 
-            List candidates = (List) responseBody.get("candidates");
-            Map first = (Map) candidates.get(0);
-            Map contentResp = (Map) first.get("content");
-            List parts = (List) contentResp.get("parts");
-            Map part = (Map) parts.get(0);
+            GeminiCandidate candidate = response.candidates.get(0);
 
-            return part.get("text").toString();
+            if (candidate.content == null ||
+                    candidate.content.parts == null ||
+                    candidate.content.parts.isEmpty()) {
+
+                return "No se pudo generar un análisis en este momento.";
+            }
+
+            return candidate.content.parts.get(0).text;
 
         } catch (Exception e) {
-            return "Error IA (Gemini): " + e.getMessage();
+            return "No se pudo generar el análisis en este momento.";
         }
+    }
+
+    // ==================================================
+    // DTOs
+    // ==================================================
+    public static class GeminiResponse {
+        public List<GeminiCandidate> candidates;
+    }
+
+    public static class GeminiCandidate {
+        public GeminiContent content;
+    }
+
+    public static class GeminiContent {
+        public List<GeminiPart> parts;
+    }
+
+    public static class GeminiPart {
+        public String text;
     }
 }

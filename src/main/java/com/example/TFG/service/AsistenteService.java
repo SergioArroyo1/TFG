@@ -3,6 +3,7 @@ package com.example.TFG.service;
 import com.example.TFG.modelo.*;
 import com.example.TFG.repository.*;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -59,6 +60,15 @@ public class AsistenteService {
         tareaRepo.deleteById(id);
     }
 
+    public void validarTarea(Long idTarea, Long idUsuario) {
+
+        Tarea t = buscarTarea(idTarea);
+
+        if (t == null || !t.getUsuario().getIdUsuario().equals(idUsuario)) {
+            throw new AccessDeniedException("No tienes permiso para esta tarea");
+        }
+    }
+
     // ==================================================
     // HÁBITOS
     // ==================================================
@@ -78,6 +88,15 @@ public class AsistenteService {
         habitoRepo.deleteById(id);
     }
 
+    public void validarHabito(Long idHabito, Long idUsuario) {
+
+        Habito h = buscarHabito(idHabito);
+
+        if (h == null || !h.getUsuario().getIdUsuario().equals(idUsuario)) {
+            throw new AccessDeniedException("No tienes permiso para este hábito");
+        }
+    }
+
     // ==================================================
     // EVENTOS
     // ==================================================
@@ -95,6 +114,15 @@ public class AsistenteService {
 
     public Evento buscarEvento(Long id) {
         return eventoRepo.findById(id).orElse(null);
+    }
+
+    public void validarEvento(Long idEvento, Long idUsuario) {
+
+        Evento e = buscarEvento(idEvento);
+
+        if (e == null || !e.getUsuario().getIdUsuario().equals(idUsuario)) {
+            throw new AccessDeniedException("No tienes permiso para este evento");
+        }
     }
 
     // ==================================================
@@ -131,6 +159,19 @@ public class AsistenteService {
         transaccionRepo.deleteById(id);
     }
 
+    public Transaccion buscarTransaccion(Long id) {
+        return transaccionRepo.findById(id).orElse(null);
+    }
+
+    public void validarTransaccion(Long idTransaccion, Long idUsuario) {
+
+        Transaccion t = buscarTransaccion(idTransaccion);
+
+        if (t == null || !t.getUsuario().getIdUsuario().equals(idUsuario)) {
+            throw new AccessDeniedException("No tienes permiso para esta transacción");
+        }
+    }
+
     // ============================
     // CATEGORÍAS
     // ============================
@@ -149,6 +190,15 @@ public class AsistenteService {
 
     public void eliminarCategoria(Long id) {
         categoriaRepo.deleteById(id);
+    }
+
+    public void validarCategoria(Long idCategoria, Long idUsuario) {
+
+        Categoria c = buscarCategoria(idCategoria);
+
+        if (c == null || !c.getUsuario().getIdUsuario().equals(idUsuario)) {
+            throw new AccessDeniedException("No tienes permiso para esta categoría");
+        }
     }
 
     // ==================================================
@@ -227,5 +277,4 @@ public class AsistenteService {
                         java.util.stream.Collectors.summingDouble(Transaccion::getCantidad)
                 ));
     }
-
 }

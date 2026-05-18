@@ -1,8 +1,10 @@
 package com.example.TFG.modelo;
 
+import com.example.TFG.modelo.enums.Rol;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,6 +37,7 @@ public class Usuario {
     private String contrasena;
 
     @Column(nullable = false)
-    @NotBlank(message = "El rol es obligatorio")
-    private String rol;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private Rol rol;
 }

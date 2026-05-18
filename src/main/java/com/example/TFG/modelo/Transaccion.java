@@ -1,5 +1,6 @@
 package com.example.TFG.modelo;
 
+import com.example.TFG.modelo.enums.TipoTransaccion;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -36,8 +37,9 @@ public class Transaccion {
     private LocalDate fecha;
 
     @Column(nullable = false)
-    @NotBlank(message = "El tipo es obligatorio")
-    private String tipo; // INGRESO o GASTO
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private TipoTransaccion tipo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)

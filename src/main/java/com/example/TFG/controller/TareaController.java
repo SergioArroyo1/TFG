@@ -3,6 +3,7 @@ package com.example.TFG.controller;
 import com.example.TFG.config.CurrentUser;
 import com.example.TFG.modelo.Tarea;
 import com.example.TFG.modelo.Usuario;
+import com.example.TFG.modelo.enums.EstadoTarea;
 import com.example.TFG.service.AsistenteService;
 import com.example.TFG.service.IAService;
 import com.example.TFG.service.UsuarioService;
@@ -17,23 +18,18 @@ import org.springframework.web.bind.annotation.*;
 public class TareaController {
 
     private final AsistenteService service;
-    private final UsuarioService usuarioService;
+    // private final UsuarioService usuarioService;
     private final IAService iaService;
 
     public TareaController(AsistenteService service,
-                           UsuarioService usuarioService,
                            IAService iaService) {
         this.service = service;
-        this.usuarioService = usuarioService;
         this.iaService = iaService;
     }
 
-    // ==================================================
-    // LISTAR TAREAS
-    // ==================================================
+    // LISTAR
     @GetMapping
-    public String listar(@CurrentUser Usuario u,
-                         Model model) {
+    public String listar(@CurrentUser Usuario u, Model model) {
 
         model.addAttribute("tareas",
                 service.obtenerTareas(u.getIdUsuario()));
@@ -41,15 +37,11 @@ public class TareaController {
         return "tareas/lista";
     }
 
-    // ==================================================
-    // IA ANALIZAR
-    // ==================================================
+    // IA
     @GetMapping("/analizar")
-    public String analizar(@CurrentUser Usuario u,
-                           Model model) {
+    public String analizar(@CurrentUser Usuario u, Model model) {
 
         var tareas = service.obtenerTareas(u.getIdUsuario());
-
         String analisis = iaService.analizarTareas(tareas);
 
         model.addAttribute("tareas", tareas);
@@ -58,9 +50,7 @@ public class TareaController {
         return "tareas/lista";
     }
 
-    // ==================================================
     // CREAR
-    // ==================================================
     @PostMapping("/crear")
     public String crear(@Valid @ModelAttribute Tarea t,
                         BindingResult br,
@@ -68,54 +58,54 @@ public class TareaController {
                         Model model) {
 
         if (br.hasErrors()) {
-
             model.addAttribute("tareas",
                     service.obtenerTareas(u.getIdUsuario()));
-
             return "tareas/lista";
         }
 
         t.setUsuario(u);
+
+        if (t.getEstado() == null) {
+            t.setEstado(EstadoTarea.PENDIENTE);
+        }
+
+        if (t.getPrioridad() == null) {
+            t.setPrioridad(0);
+        }
 
         service.guardarTarea(t);
 
         return "redirect:/tareas";
     }
 
-    // ==================================================
     // EDITAR
-    // ==================================================
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable Long id,
                          @CurrentUser Usuario u,
                          Model model) {
 
-        // VALIDACIÓN CENTRALIZADA
         service.validarTarea(id, u.getIdUsuario());
 
         Tarea t = service.buscarTarea(id);
 
         model.addAttribute("tarea", t);
+        model.addAttribute("estados", EstadoTarea.values());
 
         return "tareas/editar";
     }
 
-    // ==================================================
     // ACTUALIZAR
-    // ==================================================
     @PostMapping("/actualizar")
     public String actualizar(@Valid @ModelAttribute Tarea t,
                              BindingResult br,
                              @CurrentUser Usuario u,
                              Model model) {
 
-        // VALIDACIÓN CENTRALIZADA
         service.validarTarea(t.getIdTarea(), u.getIdUsuario());
 
         if (br.hasErrors()) {
-
             model.addAttribute("tarea", t);
-
+            model.addAttribute("estados", EstadoTarea.values());
             return "tareas/editar";
         }
 
@@ -126,14 +116,11 @@ public class TareaController {
         return "redirect:/tareas";
     }
 
-    // ==================================================
     // ELIMINAR
-    // ==================================================
     @GetMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id,
                            @CurrentUser Usuario u) {
 
-        // VALIDACIÓN CENTRALIZADA
         service.validarTarea(id, u.getIdUsuario());
 
         service.eliminarTarea(id);

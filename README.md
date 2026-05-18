@@ -128,6 +128,9 @@ Para pruebas del tribunal:
 📧 Email: admin@tfp.com
 🔑 Password:1234
 
+▶️ Ejecución del proyecto
+./mvnw spring-boot:run
+
 📊 Capturas de pantalla:
 Login / registro:
 
@@ -162,4 +165,18 @@ Finanzas:
 Panel de administración usuarios:
 
 <img width="1334" height="618" alt="image" src="https://github.com/user-attachments/assets/853f59f6-16be-43ba-98e7-06f49efbcf05" />
+
+
+🧠 Diagrama de arquitectura
+Usuario
+   ↓
+Thymeleaf (Vista)
+   ↓
+Controllers (Spring MVC)
+   ↓
+Services
+   ↓
+Repositories (JPA)
+   ↓
+PostgreSQL
 

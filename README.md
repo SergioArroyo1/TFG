@@ -128,15 +128,38 @@ Para pruebas del tribunal:
 📧 Email: admin@tfp.com
 🔑 Password:1234
 
-📊 Capturas de pantalla
-
-Incluir capturas de:
-
+📊 Capturas de pantalla:
 Login / registro:
+
 <img width="475" height="459" alt="image" src="https://github.com/user-attachments/assets/055f7a13-30d8-4414-8b51-42f56dcb39c6" />
 
-Panel principal
-Gestión de tareas
-Calendario
-Finanzas
-Panel de administración
+Panel principal:
+
+<img width="1395" height="501" alt="image" src="https://github.com/user-attachments/assets/f73c8485-b0e7-4357-b040-d767b15d29c6" />
+
+Gestión de tareas:
+
+<img width="1348" height="537" alt="image" src="https://github.com/user-attachments/assets/568d7126-860b-46f9-a6f7-364d696d9420" />
+
+Gestion Habitos:
+
+<img width="1329" height="523" alt="image" src="https://github.com/user-attachments/assets/6b651a4a-1735-4889-8399-8b35eb21b0e5" />
+
+
+Calendario:
+
+<img width="1330" height="803" alt="image" src="https://github.com/user-attachments/assets/456842cf-8d17-405c-9362-85f3cc490d08" />
+
+
+Finanzas:
+
+<img width="1316" height="582" alt="image" src="https://github.com/user-attachments/assets/0fb128ac-a49b-49e4-a74d-018ffc64d755" />
+
+<img width="1321" height="723" alt="image" src="https://github.com/user-attachments/assets/9f61c156-19e4-405b-b435-0d9dad5df17d" />
+
+<img width="1308" height="583" alt="image" src="https://github.com/user-attachments/assets/961fee36-942a-48ff-b729-a249ef36ee88" />
+
+Panel de administración usuarios:
+
+<img width="1334" height="618" alt="image" src="https://github.com/user-attachments/assets/853f59f6-16be-43ba-98e7-06f49efbcf05" />
+

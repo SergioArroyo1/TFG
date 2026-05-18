@@ -1,6 +1,7 @@
 package com.example.TFG.service;
 
 import com.example.TFG.modelo.Usuario;
+import com.example.TFG.modelo.enums.Rol;
 import com.example.TFG.repository.UsuarioRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,11 +20,16 @@ public class UsuarioService {
     }
 
     // ======================
-    //  REGISTRO
+    // REGISTRO
     // ======================
     public void registrar(Usuario u) {
-        u.setRol("USER");
-        u.setContrasena(encoder.encode(u.getContrasena()));
+
+        u.setRol(Rol.USER);
+
+        u.setContrasena(
+                encoder.encode(u.getContrasena())
+        );
+
         repo.save(u);
     }
 
@@ -38,16 +44,20 @@ public class UsuarioService {
     // BUSCAR POR EMAIL
     // ======================
     public Usuario buscarPorEmail(String email) {
+
         return repo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + email));
+                .orElseThrow(() ->
+                        new RuntimeException("Usuario no encontrado: " + email));
     }
 
     // ======================
     // BUSCAR POR ID
     // ======================
     public Usuario buscarPorId(Long id) {
+
         return repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + id));
+                .orElseThrow(() ->
+                        new RuntimeException("Usuario no encontrado con id: " + id));
     }
 
     // ======================
@@ -57,22 +67,37 @@ public class UsuarioService {
 
         // ===== CREAR =====
         if (u.getIdUsuario() == null) {
-            u.setContrasena(encoder.encode(u.getContrasena()));
+
+            u.setContrasena(
+                    encoder.encode(u.getContrasena())
+            );
         }
 
         // ===== ACTUALIZAR =====
         else {
+
             Usuario existente = repo.findById(u.getIdUsuario())
-                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                    .orElseThrow(() ->
+                            new RuntimeException("Usuario no encontrado"));
 
             // Si el admin introduce nueva contraseña → se actualiza
-            if (u.getContrasena() != null && !u.getContrasena().isBlank()
-                    && !encoder.matches(u.getContrasena(), existente.getContrasena())) {
+            if (u.getContrasena() != null
+                    && !u.getContrasena().isBlank()
+                    && !encoder.matches(
+                    u.getContrasena(),
+                    existente.getContrasena()
+            )) {
 
-                u.setContrasena(encoder.encode(u.getContrasena()));
+                u.setContrasena(
+                        encoder.encode(u.getContrasena())
+                );
+
             } else {
-                // si no toca contraseña → mantener la anterior
-                u.setContrasena(existente.getContrasena());
+
+                // Mantener contraseña anterior
+                u.setContrasena(
+                        existente.getContrasena()
+                );
             }
         }
 
@@ -80,15 +105,18 @@ public class UsuarioService {
     }
 
     // ======================
-    // ACTUALIZAR LA NUEVA CONTRASEÑA (AL EDITAR EL USUARIO)
+    // ACTUALIZAR CONTRASEÑA
     // ======================
-
-    public void actualizarConContrasena(Long id, String nuevaContrasena) {
+    public void actualizarConContrasena(Long id,
+                                        String nuevaContrasena) {
 
         Usuario u = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() ->
+                        new RuntimeException("Usuario no encontrado"));
 
-        u.setContrasena(encoder.encode(nuevaContrasena));
+        u.setContrasena(
+                encoder.encode(nuevaContrasena)
+        );
 
         repo.save(u);
     }
@@ -99,6 +127,4 @@ public class UsuarioService {
     public void eliminar(Long id) {
         repo.deleteById(id);
     }
-
-
 }

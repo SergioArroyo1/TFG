@@ -121,15 +121,15 @@ Se utiliza el puerto 5433 para evitar conflictos con instancias locales o Docker
 
 ---
 
+▶️ Ejecución del proyecto
+./mvnw spring-boot:run
+
 👤 Usuario administrador (seed)
 
 Para pruebas del tribunal:
 
 📧 Email: admin@tfp.com
 🔑 Password:1234
-
-▶️ Ejecución del proyecto
-./mvnw spring-boot:run
 
 📊 Capturas de pantalla:
 Login / registro:

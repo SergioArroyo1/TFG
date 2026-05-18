@@ -1,9 +1,11 @@
 package com.example.TFG.service;
 
 import com.example.TFG.modelo.*;
+import com.example.TFG.modelo.enums.TipoTransaccion;
 import com.example.TFG.repository.*;
-import org.springframework.stereotype.Service;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -128,7 +130,9 @@ public class AsistenteService {
     // ==================================================
     // HÁBITO HISTORIAL
     // ==================================================
+
     // Marca un hábito como cumplido en una fecha concreta
+    @Transactional
     public void marcarHabito(Long idHabito, LocalDate fecha) {
 
         // Busca el hábito o lanza error si no existe
@@ -207,18 +211,20 @@ public class AsistenteService {
 
     // Calcula el total de ingresos del usuario
     public double totalIngresos(Long idUsuario) {
+
         return transaccionRepo.findByUsuario_IdUsuario(idUsuario)
                 .stream()
-                .filter(t -> "INGRESO".equalsIgnoreCase(t.getTipo()))
+                .filter(t -> t.getTipo() == TipoTransaccion.INGRESO)
                 .mapToDouble(Transaccion::getCantidad)
                 .sum();
     }
 
     // Calcula el total de gastos del usuario
     public double totalGastos(Long idUsuario) {
+
         return transaccionRepo.findByUsuario_IdUsuario(idUsuario)
                 .stream()
-                .filter(t -> "GASTO".equalsIgnoreCase(t.getTipo()))
+                .filter(t -> t.getTipo() == TipoTransaccion.GASTO)
                 .mapToDouble(Transaccion::getCantidad)
                 .sum();
     }
@@ -229,7 +235,7 @@ public class AsistenteService {
         // Filtra solo transacciones de tipo GASTO
         List<Transaccion> gastos = transaccionRepo.findByUsuario_IdUsuario(idUsuario)
                 .stream()
-                .filter(t -> "GASTO".equalsIgnoreCase(t.getTipo()))
+                .filter(t -> t.getTipo() == TipoTransaccion.GASTO)
                 .toList();
 
         // Suma total de gastos
@@ -270,7 +276,7 @@ public class AsistenteService {
                 transaccionRepo.findByUsuario_IdUsuario(idUsuario);
 
         return transacciones.stream()
-                .filter(t -> "GASTO".equalsIgnoreCase(t.getTipo()))
+                .filter(t -> t.getTipo() == TipoTransaccion.GASTO)
                 .filter(t -> t.getCategoria() != null)
                 .collect(java.util.stream.Collectors.groupingBy(
                         t -> t.getCategoria().getIdCategoria(),

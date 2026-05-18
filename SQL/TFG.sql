@@ -22,6 +22,10 @@ CREATE TABLE Tarea (
                        FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
 );
 
+UPDATE tarea
+SET estado = 'PENDIENTE'
+WHERE estado = 'pendiente';
+
 CREATE TABLE Habito (
                         id_habito SERIAL PRIMARY KEY,
                         nombre VARCHAR(100),
@@ -178,3 +182,5 @@ SELECT * FROM Usuario;
 
 
 SELECT * FROM Evento;
+
+SELECT * FROM Tarea;

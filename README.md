@@ -136,6 +136,8 @@ Login / registro:
 
 <img width="475" height="459" alt="image" src="https://github.com/user-attachments/assets/055f7a13-30d8-4414-8b51-42f56dcb39c6" />
 
+<img width="469" height="515" alt="image" src="https://github.com/user-attachments/assets/fe300ee7-91e0-4037-9265-f5fd8cc0b3f9" />
+
 Panel principal:
 
 <img width="1395" height="501" alt="image" src="https://github.com/user-attachments/assets/f73c8485-b0e7-4357-b040-d767b15d29c6" />

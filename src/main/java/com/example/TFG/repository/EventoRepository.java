@@ -8,4 +8,6 @@ import java.util.List;
 public interface EventoRepository extends JpaRepository<Evento, Long> {
 
     List<Evento> findByUsuarioIdUsuario(Long idUsuario);
+
+    List<Evento> findByHabito_IdHabito(Long idHabito);
 }

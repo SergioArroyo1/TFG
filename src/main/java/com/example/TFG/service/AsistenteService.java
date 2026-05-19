@@ -86,8 +86,21 @@ public class AsistenteService {
         return habitoRepo.findById(id).orElse(null);
     }
 
-    public void eliminarHabito(Long id) {
-        habitoRepo.deleteById(id);
+    @Transactional
+    public void eliminarHabito(Long idHabito) {
+
+        // quitar referencia en eventos
+        List<Evento> eventos =
+                eventoRepo.findByHabito_IdHabito(idHabito);
+
+        for (Evento e : eventos) {
+            e.setHabito(null);
+        }
+
+        eventoRepo.saveAll(eventos);
+
+        // borrar hábito
+        habitoRepo.deleteById(idHabito);
     }
 
     public void validarHabito(Long idHabito, Long idUsuario) {

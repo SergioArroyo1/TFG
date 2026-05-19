@@ -117,7 +117,7 @@ Además:
 - Puerto: **5433**
 
 ### ❓ ¿Por qué puerto 5433?
-Se utiliza el puerto 5433 para evitar conflictos con instancias locales o Docker que ya usan el puerto 5432 por defecto.
+Utilizo el puerto 5433 para evitar conflictos con instancias locales o Docker que ya usan el puerto 5432 por defecto. 
 
 ---
 

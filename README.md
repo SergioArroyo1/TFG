@@ -170,15 +170,7 @@ Panel de administración usuarios:
 
 
 🧠 Diagrama de arquitectura
-Usuario
-   ↓
-Thymeleaf (Vista)
-   ↓
-Controllers (Spring MVC)
-   ↓
-Services
-   ↓
-Repositories (JPA)
-   ↓
-PostgreSQL
+
+<img width="409" height="723" alt="image" src="https://github.com/user-attachments/assets/5c148bbd-863f-4b4a-8708-4235b07543d5" />
+
 

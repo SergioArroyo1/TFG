@@ -18,7 +18,7 @@ public class HabitoHistorial {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idHistorial;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_habito", nullable = false)
     private Habito habito;
 

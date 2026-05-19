@@ -46,6 +46,6 @@ public class Evento {
     private Tarea tarea;
 
     @ManyToOne
-    @JoinColumn(name = "id_habito", nullable = true)
+    @JoinColumn(name = "id_habito")
     private Habito habito;
 }

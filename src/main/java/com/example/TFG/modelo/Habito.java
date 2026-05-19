@@ -7,6 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -34,4 +37,12 @@ public class Habito {
     @ManyToOne
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
+
+    // RELACIÓN CON HISTORIAL
+    @OneToMany(
+            mappedBy = "habito",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<HabitoHistorial> historial = new ArrayList<>();
 }

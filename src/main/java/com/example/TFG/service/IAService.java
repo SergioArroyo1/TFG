@@ -45,7 +45,31 @@ public class IAService {
 
         StringBuilder prompt = new StringBuilder();
 
-        prompt.append("Analiza estas finanzas personales. Da alertas claras y consejos prácticos:\n\n");
+        prompt.append("""
+            Analiza estas finanzas personales y responde EXACTAMENTE con este formato:
+
+            💸 GASTOS IMPORTANTES
+            - categoría problemática
+
+            ✅ GASTOS CONTROLADOS
+            - categoría estable
+
+            ⚠️ ALERTAS FINANCIERAS
+            - posible problema
+
+            🔥 RECOMENDACIONES
+            - consejo práctico y concreto
+
+            💡 RESUMEN GENERAL
+            - conclusión corta
+
+            No escribas párrafos largos.
+            Usa listas cortas.
+            Usa emojis.
+            Máximo 2 líneas por punto.
+
+            FINANZAS:
+            """);
 
         for (Categoria c : categorias) {
 
@@ -72,7 +96,28 @@ public class IAService {
 
         StringBuilder prompt = new StringBuilder();
 
-        prompt.append("Analiza estas tareas y priorízalas:\n\n");
+        prompt.append("""
+            Analiza estas tareas y responde EXACTAMENTE en este formato visual:
+
+            🔥 PRIORIDAD ALTA
+            - tarea importante
+
+            ⚠️ PRIORIDAD MEDIA
+            - tarea media
+
+            ✅ PRIORIDAD BAJA
+            - tarea simple
+
+            💡 CONSEJO GENERAL
+            - consejo corto y útil
+
+            No escribas párrafos largos.
+            Haz listas cortas y claras.
+            Usa emojis.
+            Máximo 2 líneas por punto.
+
+            TAREAS:
+            """);
 
         for (Tarea t : tareas) {
 
@@ -99,7 +144,28 @@ public class IAService {
 
         StringBuilder prompt = new StringBuilder();
 
-        prompt.append("Analiza estos hábitos:\n\n");
+        prompt.append("""
+            Analiza estos hábitos y responde EXACTAMENTE en este formato:
+
+            ✅ HÁBITOS POSITIVOS
+            - hábito bueno
+
+            ⚠️ HÁBITOS A MEJORAR
+            - hábito débil
+
+            🔥 RECOMENDACIONES
+            - consejo práctico
+
+           💡 MOTIVACIÓN
+            - frase corta motivadora
+
+            No hagas párrafos largos.
+            Usa listas cortas.
+            Usa emojis.
+            Máximo 2 líneas por punto.
+
+            HÁBITOS:
+           """);
 
         for (Habito h : habitos) {
 
@@ -122,7 +188,34 @@ public class IAService {
 
         StringBuilder prompt = new StringBuilder();
 
-        prompt.append("Analiza estos eventos personales:\n\n");
+        prompt.append("""
+            Analiza estos eventos personales y responde EXACTAMENTE en este formato:
+
+            📅 EVENTOS IMPORTANTES
+            - eventos relevantes fecha futura o actual
+
+            📅 EVENTOS PENDIENTES
+            - eventos cuya fecha es futura o actual
+            
+            ⏰ EVENTOS CADUCADOS
+            - eventos cuya fecha ya ha pasado
+
+            ✅ EVENTOS COMPLETADOS
+            - eventos ya marcados como completados
+
+            🔥 RECOMENDACIONES
+            - consejos para organización del calendario
+
+            💡 RESUMEN GENERAL
+            - conclusión breve
+
+            No escribas párrafos largos.
+            Usa listas cortas.
+            Usa emojis.
+            Máximo 2 líneas por punto.
+
+            EVENTOS:
+            """);
 
         for (Evento e : eventos) {
 

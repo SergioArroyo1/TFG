@@ -28,15 +28,9 @@ public class EventoController {
         model.addAttribute("eventos",
                 service.obtenerEventos(u.getIdUsuario()));
 
-        // IMPORTANTE:
-        // Como tareas y hábitos ahora usan Page<>
-        // usamos .getContent() para enviar solo la lista
+        model.addAttribute("tareas", service.obtenerTodasTareas(u.getIdUsuario()));
 
-        model.addAttribute("tareas",
-                service.obtenerTareas(u.getIdUsuario(), 0).getContent());
-
-        model.addAttribute("habitos",
-                service.obtenerHabitos(u.getIdUsuario(), 0).getContent());
+        model.addAttribute("habitos", service.obtenerTodosHabitos(u.getIdUsuario()));
 
         return "eventos/calendario";
     }

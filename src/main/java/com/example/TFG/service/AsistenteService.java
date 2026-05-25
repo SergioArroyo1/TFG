@@ -76,6 +76,9 @@ public class AsistenteService {
             throw new AccessDeniedException("No tienes permiso para esta tarea");
         }
     }
+    public List<Tarea> obtenerTodasTareas(Long idUsuario) {
+        return tareaRepo.findByUsuario_IdUsuario(idUsuario);
+    }
 
     // ==================================================
     // HÁBITOS
@@ -119,6 +122,10 @@ public class AsistenteService {
         if (h == null || !h.getUsuario().getIdUsuario().equals(idUsuario)) {
             throw new AccessDeniedException("No tienes permiso para este hábito");
         }
+    }
+
+    public List<Habito> obtenerTodosHabitos(Long idUsuario) {
+        return habitoRepo.findByUsuario_IdUsuario(idUsuario);
     }
 
     // ==================================================

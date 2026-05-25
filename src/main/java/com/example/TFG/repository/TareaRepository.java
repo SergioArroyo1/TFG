@@ -1,11 +1,12 @@
 package com.example.TFG.repository;
 
-
 import com.example.TFG.modelo.Tarea;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
 public interface TareaRepository extends JpaRepository<Tarea, Long> {
-    List<Tarea> findByUsuarioIdUsuario(Long idUsuario);
+
+    Page<Tarea> findByUsuarioIdUsuario(Long idUsuario, Pageable pageable);
+
 }

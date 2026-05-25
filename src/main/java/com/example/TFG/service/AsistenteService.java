@@ -6,6 +6,9 @@ import com.example.TFG.repository.*;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -46,8 +49,11 @@ public class AsistenteService {
     // ==================================================
     // TAREAS
     // ==================================================
-    public List<Tarea> obtenerTareas(Long idUsuario) {
-        return tareaRepo.findByUsuarioIdUsuario(idUsuario);
+    public Page<Tarea> obtenerTareas(Long idUsuario, int pagina) {
+
+        Pageable pageable = PageRequest.of(pagina, 5);
+
+        return tareaRepo.findByUsuarioIdUsuario(idUsuario, pageable);
     }
 
     public void guardarTarea(Tarea t) {
@@ -74,8 +80,11 @@ public class AsistenteService {
     // ==================================================
     // HÁBITOS
     // ==================================================
-    public List<Habito> obtenerHabitos(Long idUsuario) {
-        return habitoRepo.findByUsuarioIdUsuario(idUsuario);
+    public Page<Habito> obtenerHabitos(Long idUsuario, int pagina) {
+
+        Pageable pageable = PageRequest.of(pagina, 5);
+
+        return habitoRepo.findByUsuarioIdUsuario(idUsuario, pageable);
     }
 
     public void guardarHabito(Habito h) {
@@ -164,8 +173,12 @@ public class AsistenteService {
     // ============================
     // FINANZAS - TRANSACCIONES
     // ============================
-    public List<Transaccion> obtenerTransacciones(Long idUsuario) {
-        return transaccionRepo.findByUsuario_IdUsuario(idUsuario);
+    public Page<Transaccion> obtenerTransacciones(Long idUsuario,
+                                                  int pagina) {
+
+        Pageable pageable = PageRequest.of(pagina, 5);
+
+        return transaccionRepo.findByUsuario_IdUsuario(idUsuario, pageable);
     }
 
     public void guardarTransaccion(Transaccion t) {
@@ -225,7 +238,9 @@ public class AsistenteService {
     // Calcula el total de ingresos del usuario
     public double totalIngresos(Long idUsuario) {
 
-        return transaccionRepo.findByUsuario_IdUsuario(idUsuario)
+        return transaccionRepo
+                .findByUsuario_IdUsuario(idUsuario, Pageable.unpaged())
+                .getContent()
                 .stream()
                 .filter(t -> t.getTipo() == TipoTransaccion.INGRESO)
                 .mapToDouble(Transaccion::getCantidad)
@@ -235,7 +250,9 @@ public class AsistenteService {
     // Calcula el total de gastos del usuario
     public double totalGastos(Long idUsuario) {
 
-        return transaccionRepo.findByUsuario_IdUsuario(idUsuario)
+        return transaccionRepo
+                .findByUsuario_IdUsuario(idUsuario, Pageable.unpaged())
+                .getContent()
                 .stream()
                 .filter(t -> t.getTipo() == TipoTransaccion.GASTO)
                 .mapToDouble(Transaccion::getCantidad)
@@ -246,7 +263,9 @@ public class AsistenteService {
     public Map<String, Double> porcentajeGastoPorCategoria(Long idUsuario) {
 
         // Filtra solo transacciones de tipo GASTO
-        List<Transaccion> gastos = transaccionRepo.findByUsuario_IdUsuario(idUsuario)
+        List<Transaccion> gastos = transaccionRepo
+                .findByUsuario_IdUsuario(idUsuario, Pageable.unpaged())
+                .getContent()
                 .stream()
                 .filter(t -> t.getTipo() == TipoTransaccion.GASTO)
                 .toList();
@@ -270,7 +289,8 @@ public class AsistenteService {
 
             resultado.put(
                     categoria,
-                    resultado.getOrDefault(categoria, 0.0) + t.getCantidad()
+                    resultado.getOrDefault(categoria, 0.0)
+                            + t.getCantidad()
             );
         }
 
@@ -286,14 +306,56 @@ public class AsistenteService {
     public Map<Long, Double> gastoPorCategoria(Long idUsuario) {
 
         List<Transaccion> transacciones =
-                transaccionRepo.findByUsuario_IdUsuario(idUsuario);
+                transaccionRepo
+                        .findByUsuario_IdUsuario(idUsuario, Pageable.unpaged())
+                        .getContent();
 
-        return transacciones.stream()
-                .filter(t -> t.getTipo() == TipoTransaccion.GASTO)
-                .filter(t -> t.getCategoria() != null)
-                .collect(java.util.stream.Collectors.groupingBy(
-                        t -> t.getCategoria().getIdCategoria(),
-                        java.util.stream.Collectors.summingDouble(Transaccion::getCantidad)
-                ));
+        Map<Long, Double> resultado = new HashMap<>();
+
+        for (Transaccion t : transacciones) {
+
+            if (t.getCategoria() == null) {
+                continue;
+            }
+
+            Long idCategoria =
+                    t.getCategoria().getIdCategoria();
+
+            String nombreCategoria =
+                    t.getCategoria().getNombre();
+
+            double valorActual =
+                    resultado.getOrDefault(idCategoria, 0.0);
+
+            // =========================
+            // AHORRO → SUMA INGRESOS
+            // =========================
+            if ("Ahorro".equalsIgnoreCase(nombreCategoria)) {
+
+                if (t.getTipo() == TipoTransaccion.INGRESO) {
+
+                    resultado.put(
+                            idCategoria,
+                            valorActual + t.getCantidad()
+                    );
+                }
+            }
+
+            // =========================
+            // RESTO → SUMA GASTOS
+            // =========================
+            else {
+
+                if (t.getTipo() == TipoTransaccion.GASTO) {
+
+                    resultado.put(
+                            idCategoria,
+                            valorActual + t.getCantidad()
+                    );
+                }
+            }
+        }
+
+        return resultado;
     }
 }

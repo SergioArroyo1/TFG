@@ -213,22 +213,29 @@ public class IAService {
             Analiza estos eventos personales y responde EXACTAMENTE en este formato:
 
             📅 EVENTOS IMPORTANTES
-            - eventos relevantes fecha futura o actual
+            - eventos relevantes con fecha futura o actual
 
             📅 EVENTOS PENDIENTES
             - eventos cuya fecha es futura o actual
-            
+
             ⏰ EVENTOS CADUCADOS
-            - eventos cuya fecha ya ha pasado
+            - eventos cuya fecha ya pasó y NO están completados
+            - eventos olvidados o vencidos
 
             ✅ EVENTOS COMPLETADOS
-            - eventos ya marcados como completados
+            - eventos marcados manualmente como completados
 
             🔥 RECOMENDACIONES
             - consejos para organización del calendario
 
             💡 RESUMEN GENERAL
             - conclusión breve
+
+            IMPORTANTE:
+            - Un evento COMPLETADO solo debe aparecer si está marcado como completado.
+            - Los eventos cuya fecha ya pasó pero NO están completados deben ir en "⏰ EVENTOS CADUCADOS".
+            - No mezclar eventos caducados con completados.
+            - Los eventos futuros nunca son caducados.
 
             No escribas párrafos largos.
             Usa listas cortas.
@@ -240,10 +247,18 @@ public class IAService {
 
         for (Evento e : eventos) {
 
+            long diasRestantes =
+                    ChronoUnit.DAYS.between(
+                            LocalDate.now(),
+                            e.getFecha()
+                    );
+
             prompt.append("- ")
                     .append(e.getTitulo())
                     .append(" | Fecha: ")
                     .append(e.getFecha())
+                    .append(" | Días restantes: ")
+                    .append(diasRestantes)
                     .append(" | Completado: ")
                     .append(e.getCompletado())
                     .append("\n");

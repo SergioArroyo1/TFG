@@ -26,6 +26,7 @@
                 <li class="nav-item"><a class="nav-link" th:href="@{/habitos}">Hábitos</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/eventos}">Calendario</a></li>
                 <li class="nav-item"><a class="nav-link active" th:href="@{/finanzas}">Finanzas</a></li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')"><a class="nav-link" th:href="@{/admin}">Admin</a></li>
             </ul>
 
             <span class="navbar-text text-white me-3">
@@ -33,7 +34,7 @@
             </span>
 
             <form th:action="@{/logout}" method="post">
-                <button class="btn btn-outline-light">Salir</button>
+                <button class="btn btn-outline-light">Cerrar Sesión</button>
             </form>
 
         </div>

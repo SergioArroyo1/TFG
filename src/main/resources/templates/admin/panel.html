@@ -33,8 +33,13 @@
 
             </ul>
 
+            <!-- Usuario + logout -->
+            <span class="navbar-text text-white me-3">
+                👤 <span sec:authentication="principal.username"></span>
+            </span>
+
             <form th:action="@{/logout}" method="post">
-                <button class="btn btn-outline-light">Salir</button>
+                <button class="btn btn-outline-light">Cerrar Sesión</button>
             </form>
 
         </div>

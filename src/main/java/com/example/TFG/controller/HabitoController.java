@@ -6,6 +6,7 @@ import com.example.TFG.modelo.Usuario;
 import com.example.TFG.service.AsistenteService;
 import com.example.TFG.service.IAService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -28,11 +29,19 @@ public class HabitoController {
     // LISTAR HÁBITOS
     // ==================================================
     @GetMapping
-    public String listar(@CurrentUser Usuario usuario,
+    public String listar(@RequestParam(defaultValue = "0") int pagina,
+                         @CurrentUser Usuario usuario,
                          Model model) {
 
-        model.addAttribute("habitos",
-                service.obtenerHabitos(usuario.getIdUsuario()));
+        Page<Habito> habitosPage =
+                service.obtenerHabitos(usuario.getIdUsuario(), pagina);
+
+        model.addAttribute("habitos", habitosPage.getContent());
+
+        model.addAttribute("paginaActual", pagina);
+
+        model.addAttribute("totalPaginas",
+                habitosPage.getTotalPages());
 
         return "habitos/lista";
     }
@@ -41,15 +50,24 @@ public class HabitoController {
     // IA ANALIZAR HÁBITOS
     // ==================================================
     @GetMapping("/analizar")
-    public String analizar(@CurrentUser Usuario usuario,
+    public String analizar(@RequestParam(defaultValue = "0") int pagina,
+                           @CurrentUser Usuario usuario,
                            Model model) {
 
-        var habitos = service.obtenerHabitos(usuario.getIdUsuario());
+        Page<Habito> habitosPage =
+                service.obtenerHabitos(usuario.getIdUsuario(), pagina);
 
-        String analisis = iaService.analizarHabitos(habitos);
+        String analisis =
+                iaService.analizarHabitos(habitosPage.getContent());
 
-        model.addAttribute("habitos", habitos);
+        model.addAttribute("habitos", habitosPage.getContent());
+
         model.addAttribute("analisisHabitos", analisis);
+
+        model.addAttribute("paginaActual", pagina);
+
+        model.addAttribute("totalPaginas",
+                habitosPage.getTotalPages());
 
         return "habitos/lista";
     }
@@ -65,8 +83,16 @@ public class HabitoController {
 
         if (br.hasErrors()) {
 
+            Page<Habito> habitosPage =
+                    service.obtenerHabitos(usuario.getIdUsuario(), 0);
+
             model.addAttribute("habitos",
-                    service.obtenerHabitos(usuario.getIdUsuario()));
+                    habitosPage.getContent());
+
+            model.addAttribute("paginaActual", 0);
+
+            model.addAttribute("totalPaginas",
+                    habitosPage.getTotalPages());
 
             return "habitos/lista";
         }
@@ -86,7 +112,6 @@ public class HabitoController {
                          @CurrentUser Usuario usuario,
                          Model model) {
 
-        // VALIDACIÓN CENTRALIZADA
         service.validarHabito(id, usuario.getIdUsuario());
 
         Habito habito = service.buscarHabito(id);
@@ -105,7 +130,6 @@ public class HabitoController {
                              @CurrentUser Usuario usuario,
                              Model model) {
 
-        // VALIDACIÓN CENTRALIZADA
         service.validarHabito(
                 habito.getIdHabito(),
                 usuario.getIdUsuario()
@@ -130,7 +154,6 @@ public class HabitoController {
     public String eliminar(@PathVariable Long id,
                            @CurrentUser Usuario usuario) {
 
-        // VALIDACIÓN CENTRALIZADA
         service.validarHabito(id, usuario.getIdUsuario());
 
         service.eliminarHabito(id);

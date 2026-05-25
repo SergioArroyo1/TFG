@@ -6,7 +6,7 @@ import com.example.TFG.modelo.Usuario;
 import com.example.TFG.modelo.enums.EstadoTarea;
 import com.example.TFG.service.AsistenteService;
 import com.example.TFG.service.IAService;
-import com.example.TFG.service.UsuarioService;
+import org.springframework.data.domain.Page;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,23 +29,45 @@ public class TareaController {
 
     // LISTAR
     @GetMapping
-    public String listar(@CurrentUser Usuario u, Model model) {
+    public String listar(@RequestParam(defaultValue = "0") int pagina,
+                         @CurrentUser Usuario u,
+                         Model model) {
 
-        model.addAttribute("tareas",
-                service.obtenerTareas(u.getIdUsuario()));
+        Page<Tarea> tareasPage =
+                service.obtenerTareas(u.getIdUsuario(), pagina);
+
+        model.addAttribute("tareas", tareasPage.getContent());
+
+        model.addAttribute("paginaActual", pagina);
+
+        model.addAttribute("totalPaginas",
+                tareasPage.getTotalPages());
 
         return "tareas/lista";
     }
 
     // IA
     @GetMapping("/analizar")
-    public String analizar(@CurrentUser Usuario u, Model model) {
+    public String analizar(@RequestParam(defaultValue = "0") int pagina,
+                           @CurrentUser Usuario u,
+                           Model model) {
 
-        var tareas = service.obtenerTareas(u.getIdUsuario());
-        String analisis = iaService.analizarTareas(tareas);
+        Page<Tarea> tareasPage =
+                service.obtenerTareas(u.getIdUsuario(), pagina);
 
-        model.addAttribute("tareas", tareas);
-        model.addAttribute("analisisTareas", analisis);
+        String analisis =
+                iaService.analizarTareas(tareasPage.getContent());
+
+        model.addAttribute("tareas",
+                tareasPage.getContent());
+
+        model.addAttribute("analisisTareas",
+                analisis);
+
+        model.addAttribute("paginaActual", pagina);
+
+        model.addAttribute("totalPaginas",
+                tareasPage.getTotalPages());
 
         return "tareas/lista";
     }
@@ -59,7 +81,7 @@ public class TareaController {
 
         if (br.hasErrors()) {
             model.addAttribute("tareas",
-                    service.obtenerTareas(u.getIdUsuario()));
+                    service.obtenerTareas(u.getIdUsuario(), 0).getContent());
             return "tareas/lista";
         }
 

@@ -33,12 +33,21 @@ public class FinanzasController {
     // ==================================================
     @GetMapping
     public String finanzas(@CurrentUser Usuario usuario,
+                           @RequestParam(defaultValue = "0") int pagina,
                            Model model) {
 
         Long usuarioId = usuario.getIdUsuario();
 
+        var transaccionesPage =
+                service.obtenerTransacciones(usuarioId, pagina);
+
         model.addAttribute("transacciones",
-                service.obtenerTransacciones(usuarioId));
+                transaccionesPage.getContent());
+
+        model.addAttribute("paginaActual", pagina);
+
+        model.addAttribute("totalPaginas",
+                transaccionesPage.getTotalPages());
 
         model.addAttribute("categorias",
                 service.obtenerCategorias(usuarioId));
@@ -69,6 +78,7 @@ public class FinanzasController {
     // ==================================================
     @GetMapping("/analizar")
     public String analizarIA(@CurrentUser Usuario usuario,
+                             @RequestParam(defaultValue = "0") int pagina,
                              Model model) {
 
         Long usuarioId = usuario.getIdUsuario();
@@ -82,8 +92,16 @@ public class FinanzasController {
         String respuestaIA =
                 iaService.analizarFinanzas(gastoCategoria, categorias);
 
+        var transaccionesPage =
+                service.obtenerTransacciones(usuarioId, pagina);
+
         model.addAttribute("transacciones",
-                service.obtenerTransacciones(usuarioId));
+                transaccionesPage.getContent());
+
+        model.addAttribute("paginaActual", pagina);
+
+        model.addAttribute("totalPaginas",
+                transaccionesPage.getTotalPages());
 
         model.addAttribute("categorias", categorias);
 
@@ -122,8 +140,16 @@ public class FinanzasController {
 
         if (br.hasErrors()) {
 
+            var transaccionesPage =
+                    service.obtenerTransacciones(usuarioId, 0);
+
             model.addAttribute("transacciones",
-                    service.obtenerTransacciones(usuarioId));
+                    transaccionesPage.getContent());
+
+            model.addAttribute("paginaActual", 0);
+
+            model.addAttribute("totalPaginas",
+                    transaccionesPage.getTotalPages());
 
             model.addAttribute("categorias",
                     service.obtenerCategorias(usuarioId));
@@ -151,8 +177,16 @@ public class FinanzasController {
 
         if (br.hasErrors()) {
 
+            var transaccionesPage =
+                    service.obtenerTransacciones(usuarioId, 0);
+
             model.addAttribute("transacciones",
-                    service.obtenerTransacciones(usuarioId));
+                    transaccionesPage.getContent());
+
+            model.addAttribute("paginaActual", 0);
+
+            model.addAttribute("totalPaginas",
+                    transaccionesPage.getTotalPages());
 
             model.addAttribute("categorias",
                     service.obtenerCategorias(usuarioId));
@@ -168,7 +202,7 @@ public class FinanzasController {
     }
 
     // ==================================================
-    // EDITAR CATEGORIA (SEGURIDAD CENTRALIZADA)
+    // EDITAR CATEGORIA
     // ==================================================
     @PostMapping("/categoria/editar")
     public String editarCategoria(
@@ -179,7 +213,6 @@ public class FinanzasController {
 
         Long usuarioId = usuario.getIdUsuario();
 
-        // VALIDACIÓN CENTRALIZADA
         service.validarCategoria(
                 categoria.getIdCategoria(),
                 usuarioId
@@ -187,8 +220,16 @@ public class FinanzasController {
 
         if (br.hasErrors()) {
 
+            var transaccionesPage =
+                    service.obtenerTransacciones(usuarioId, 0);
+
             model.addAttribute("transacciones",
-                    service.obtenerTransacciones(usuarioId));
+                    transaccionesPage.getContent());
+
+            model.addAttribute("paginaActual", 0);
+
+            model.addAttribute("totalPaginas",
+                    transaccionesPage.getTotalPages());
 
             model.addAttribute("categorias",
                     service.obtenerCategorias(usuarioId));
@@ -209,13 +250,12 @@ public class FinanzasController {
     }
 
     // ==================================================
-    // ELIMINAR CATEGORIA (SEGURIDAD CENTRALIZADA)
+    // ELIMINAR CATEGORIA
     // ==================================================
     @GetMapping("/categoria/eliminar/{id}")
     public String eliminarCategoria(@PathVariable Long id,
                                     @CurrentUser Usuario usuario) {
 
-        // VALIDACIÓN CENTRALIZADA
         service.validarCategoria(id, usuario.getIdUsuario());
 
         service.eliminarCategoria(id);
@@ -224,13 +264,12 @@ public class FinanzasController {
     }
 
     // ==================================================
-    // ELIMINAR TRANSACCION (SEGURIDAD CENTRALIZADA)
+    // ELIMINAR TRANSACCION
     // ==================================================
     @GetMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id,
                            @CurrentUser Usuario usuario) {
 
-        // VALIDACIÓN CENTRALIZADA
         service.validarTransaccion(id, usuario.getIdUsuario());
 
         service.eliminarTransaccion(id);

@@ -22,9 +22,19 @@ public class AdminController {
     // PANEL
     // ======================
     @GetMapping
-    public String panel(Model model) {
+    public String panel(
+            @RequestParam(defaultValue = "0") int pagina,
+            Model model) {
 
-        model.addAttribute("usuarios", service.obtenerTodos());
+        var usuariosPage = service.obtenerTodos(pagina);
+
+        model.addAttribute("usuarios", usuariosPage.getContent());
+
+        model.addAttribute("paginaActual", pagina);
+
+        model.addAttribute("totalPaginas",
+                usuariosPage.getTotalPages());
+
         return "admin/panel";
     }
 

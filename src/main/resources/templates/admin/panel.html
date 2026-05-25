@@ -87,6 +87,46 @@
             </tbody>
 
         </table>
+        <!-- PAGINACIÓN -->
+        <nav th:if="${totalPaginas > 1}" class="mt-4">
+
+            <ul class="pagination justify-content-center">
+
+                <!-- ANTERIOR -->
+                <li class="page-item"
+                    th:classappend="${paginaActual == 0} ? 'disabled'">
+
+                    <a class="page-link"
+                       th:href="@{/admin(pagina=${paginaActual - 1})}">
+                        Anterior
+                    </a>
+                </li>
+
+                <!-- NÚMEROS -->
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+                    th:classappend="${i == paginaActual} ? 'active'">
+
+                    <a class="page-link"
+                       th:href="@{/admin(pagina=${i})}"
+                       th:text="${i + 1}">
+                    </a>
+
+                </li>
+
+                <!-- SIGUIENTE -->
+                <li class="page-item"
+                    th:classappend="${paginaActual >= totalPaginas - 1} ? 'disabled'">
+
+                    <a class="page-link"
+                       th:href="@{/admin(pagina=${paginaActual + 1})}">
+                        Siguiente
+                    </a>
+                </li>
+
+            </ul>
+
+        </nav>
 
     </div>
 

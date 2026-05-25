@@ -9,7 +9,7 @@
 </head>
 <body class="bg-light">
 
-<!--  NAVBAR -->
+<!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
 
@@ -59,7 +59,8 @@
 
     <!-- BOTÓN IA -->
     <div class="mb-3">
-        <a th:href="@{/tareas/analizar}" class="btn btn-info">
+        <a th:href="@{/tareas/analizar(pagina=${paginaActual})}"
+           class="btn btn-info">
             🤖 Analizar tareas con IA
         </a>
     </div>
@@ -67,11 +68,15 @@
     <!-- IA RESULTADO -->
     <div class="alert alert-info mb-4" th:if="${analisisTareas != null}">
         <strong>🤖 IA - Análisis de tareas:</strong>
-        <p class="mb-0" th:text="${analisisTareas}"></p>
+        <div class="mt-3"
+             style="white-space: pre-line;"
+             th:text="${analisisTareas}">
+        </div>
     </div>
 
     <!-- FORMULARIO CREAR -->
     <div class="card shadow p-4 mb-4">
+
         <form th:action="@{/tareas/crear}" method="post" class="row g-3">
 
             <div class="col-md-3">
@@ -97,8 +102,8 @@
                        required />
             </div>
 
-            <!-- ENUM ESTADO -->
             <div class="col-md-2">
+
                 <select class="form-select" name="estado" required>
 
                     <option value="PENDIENTE" selected>
@@ -110,6 +115,7 @@
                     </option>
 
                 </select>
+
             </div>
 
             <!-- CSRF -->
@@ -124,6 +130,7 @@
             </div>
 
         </form>
+
     </div>
 
     <!-- TABLA -->
@@ -132,6 +139,7 @@
         <table class="table table-striped table-hover align-middle">
 
             <thead class="table-dark">
+
             <tr>
                 <th>Título</th>
                 <th>Descripción</th>
@@ -139,6 +147,7 @@
                 <th>Fecha límite</th>
                 <th>Acciones</th>
             </tr>
+
             </thead>
 
             <tbody>
@@ -150,10 +159,12 @@
                 <td th:text="${t.descripcion}"></td>
 
                 <td>
+
                     <span class="badge"
                           th:classappend="${t.estado.name() == 'COMPLETADA'} ? 'bg-success' : 'bg-warning text-dark'"
                           th:text="${t.estado}">
                     </span>
+
                 </td>
 
                 <td th:text="${t.fechaLimite}"></td>
@@ -178,6 +189,49 @@
             </tbody>
 
         </table>
+
+        <!-- PAGINACIÓN -->
+        <nav class="mt-4" th:if="${totalPaginas > 1}">
+
+            <ul class="pagination justify-content-center">
+
+                <!-- ANTERIOR -->
+                <li class="page-item"
+                    th:classappend="${paginaActual == 0} ? 'disabled'">
+
+                    <a class="page-link"
+                       th:href="@{/tareas(pagina=${paginaActual - 1})}">
+                        Anterior
+                    </a>
+
+                </li>
+
+                <!-- NÚMEROS -->
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+                    th:classappend="${i == paginaActual} ? 'active'">
+
+                    <a class="page-link"
+                       th:href="@{/tareas(pagina=${i})}"
+                       th:text="${i + 1}">
+                    </a>
+
+                </li>
+
+                <!-- SIGUIENTE -->
+                <li class="page-item"
+                    th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
+
+                    <a class="page-link"
+                       th:href="@{/tareas(pagina=${paginaActual + 1})}">
+                        Siguiente
+                    </a>
+
+                </li>
+
+            </ul>
+
+        </nav>
 
     </div>
 

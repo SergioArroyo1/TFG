@@ -67,7 +67,10 @@
     <!-- IA RESULTADO -->
     <div class="alert alert-success mb-4" th:if="${analisisHabitos != null}">
         <strong>🧠 IA - Análisis de hábitos:</strong>
-        <p class="mb-0" th:text="${analisisHabitos}"></p>
+        <div class="mt-3"
+             style="white-space: pre-line;"
+             th:text="${analisisHabitos}">
+        </div>
     </div>
 
     <!-- FORMULARIO CREAR -->
@@ -133,6 +136,43 @@
             </tbody>
 
         </table>
+        <!-- PAGINACIÓN -->
+        <nav class="mt-4" th:if="${totalPaginas > 1}">
+            <ul class="pagination justify-content-center">
+
+                <!-- ANTERIOR -->
+                <li class="page-item"
+                    th:classappend="${paginaActual == 0} ? 'disabled'">
+
+                    <a class="page-link"
+                       th:href="@{/habitos(pagina=${paginaActual - 1})}">
+                        Anterior
+                    </a>
+                </li>
+
+                <!-- NÚMEROS -->
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+                    th:classappend="${i == paginaActual} ? 'active'">
+
+                    <a class="page-link"
+                       th:href="@{/habitos(pagina=${i})}"
+                       th:text="${i + 1}">
+                    </a>
+                </li>
+
+                <!-- SIGUIENTE -->
+                <li class="page-item"
+                    th:classappend="${paginaActual + 1 >= totalPaginas} ? 'disabled'">
+
+                    <a class="page-link"
+                       th:href="@{/habitos(pagina=${paginaActual + 1})}">
+                        Siguiente
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
 
     </div>
 

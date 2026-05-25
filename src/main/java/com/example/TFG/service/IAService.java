@@ -48,6 +48,10 @@ public class IAService {
         prompt.append("""
             Analiza estas finanzas personales y responde EXACTAMENTE con este formato:
 
+            💸 GASTOS GENERALES
+            - resumen de los gastos reales
+            - categorías donde más dinero se está gastando
+
             💸 GASTOS IMPORTANTES
             - categoría problemática
 
@@ -60,8 +64,17 @@ public class IAService {
             🔥 RECOMENDACIONES
             - consejo práctico y concreto
 
+            💰 AHORRO
+            - analiza únicamente ingresos y ahorro acumulado
+            - NO consideres ahorro como gasto
+
             💡 RESUMEN GENERAL
             - conclusión corta
+
+            IMPORTANTE:
+            - La categoría "Ahorro" NO debe tratarse como gasto.
+            - "Ahorro" representa dinero guardado desde ingresos.
+            - Solo analiza como gasto las categorías reales de consumo.
 
             No escribas párrafos largos.
             Usa listas cortas.
@@ -108,8 +121,16 @@ public class IAService {
             ✅ PRIORIDAD BAJA
             - tarea simple
 
+            ✔️ TAREAS COMPLETADAS
+            - tarea completada correctamente
+
             💡 CONSEJO GENERAL
             - consejo corto y útil
+
+            IMPORTANTE:
+            - Las tareas con estado COMPLETADA deben aparecer SOLO en el apartado "✔️ TAREAS COMPLETADAS".
+            - No pongas tareas completadas en prioridades.
+            - Las tareas pendientes deben ordenarse por prioridad.
 
             No escribas párrafos largos.
             Haz listas cortas y claras.
@@ -123,12 +144,12 @@ public class IAService {
 
             prompt.append("- ")
                     .append(t.getTitulo())
+                    .append(" | Estado: ")
+                    .append(t.getEstado())
                     .append(" | Fecha límite: ")
                     .append(t.getFechaLimite())
                     .append(" | Días restantes: ")
-                    .append(
-                            ChronoUnit.DAYS.between(LocalDate.now(), t.getFechaLimite())
-                    )
+                    .append(ChronoUnit.DAYS.between(LocalDate.now(), t.getFechaLimite()))
                     .append("\n");
         }
 

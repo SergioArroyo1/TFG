@@ -3,6 +3,9 @@ package com.example.TFG.service;
 import com.example.TFG.modelo.Usuario;
 import com.example.TFG.modelo.enums.Rol;
 import com.example.TFG.repository.UsuarioRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,10 +39,12 @@ public class UsuarioService {
     // ======================
     // LISTAR TODOS
     // ======================
-    public List<Usuario> obtenerTodos() {
-        return repo.findAll();
-    }
+    public Page<Usuario> obtenerTodos(int pagina) {
 
+        Pageable pageable = PageRequest.of(pagina, 5);
+
+        return repo.findAll(pageable);
+    }
     // ======================
     // BUSCAR POR EMAIL
     // ======================

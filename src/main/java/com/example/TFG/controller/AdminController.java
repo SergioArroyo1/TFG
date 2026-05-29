@@ -24,16 +24,33 @@ public class AdminController {
     @GetMapping
     public String panel(
             @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(required = false) String buscar,
             Model model) {
 
-        var usuariosPage = service.obtenerTodos(pagina);
+        var usuariosPage = service.buscarPorNombre(
+                buscar,
+                pagina
+        );
 
-        model.addAttribute("usuarios", usuariosPage.getContent());
+        model.addAttribute(
+                "usuarios",
+                usuariosPage.getContent()
+        );
 
-        model.addAttribute("paginaActual", pagina);
+        model.addAttribute(
+                "paginaActual",
+                pagina
+        );
 
-        model.addAttribute("totalPaginas",
-                usuariosPage.getTotalPages());
+        model.addAttribute(
+                "totalPaginas",
+                usuariosPage.getTotalPages()
+        );
+
+        model.addAttribute(
+                "buscar",
+                buscar
+        );
 
         return "admin/panel";
     }

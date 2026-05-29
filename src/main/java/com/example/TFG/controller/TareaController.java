@@ -1,6 +1,7 @@
 package com.example.TFG.controller;
 
 import com.example.TFG.config.CurrentUser;
+import com.example.TFG.modelo.Habito;
 import com.example.TFG.modelo.Tarea;
 import com.example.TFG.modelo.Usuario;
 import com.example.TFG.modelo.enums.EstadoTarea;
@@ -30,18 +31,35 @@ public class TareaController {
     // LISTAR
     @GetMapping
     public String listar(@RequestParam(defaultValue = "0") int pagina,
+                         @RequestParam(required = false) String buscar,
                          @CurrentUser Usuario u,
                          Model model) {
 
-        Page<Tarea> tareasPage =
-                service.obtenerTareas(u.getIdUsuario(), pagina);
+        Page<Tarea> tareasPage = service.buscarTareasPorTitulo(
+                u.getIdUsuario(),
+                buscar,
+                pagina
+        );
 
-        model.addAttribute("tareas", tareasPage.getContent());
+        model.addAttribute(
+                "tareas",
+                tareasPage.getContent()
+        );
 
-        model.addAttribute("paginaActual", pagina);
+        model.addAttribute(
+                "paginaActual",
+                pagina
+        );
 
-        model.addAttribute("totalPaginas",
-                tareasPage.getTotalPages());
+        model.addAttribute(
+                "totalPaginas",
+                tareasPage.getTotalPages()
+        );
+
+        model.addAttribute(
+                "buscar",
+                buscar
+        );
 
         return "tareas/lista";
     }
@@ -56,7 +74,11 @@ public class TareaController {
                 service.obtenerTareas(u.getIdUsuario(), pagina);
 
         String analisis =
-                iaService.analizarTareas(tareasPage.getContent());
+                iaService.analizarTareas(
+                        service.obtenerTodasTareas(
+                                u.getIdUsuario()
+                        )
+                );
 
         model.addAttribute("tareas",
                 tareasPage.getContent());
@@ -80,8 +102,18 @@ public class TareaController {
                         Model model) {
 
         if (br.hasErrors()) {
+
+            Page<Tarea> tareasPage =
+                    service.obtenerTareas(u.getIdUsuario(), 0);
+
             model.addAttribute("tareas",
-                    service.obtenerTareas(u.getIdUsuario(), 0).getContent());
+                    tareasPage.getContent());
+
+            model.addAttribute("paginaActual", 0);
+
+            model.addAttribute("totalPaginas",
+                    tareasPage.getTotalPages());
+
             return "tareas/lista";
         }
 
@@ -95,7 +127,28 @@ public class TareaController {
             t.setPrioridad(0);
         }
 
-        service.guardarTarea(t);
+        try {
+
+            service.guardarTarea(t);
+
+        } catch (RuntimeException e) {
+
+            Page<Tarea> tareasPage =
+                    service.obtenerTareas(u.getIdUsuario(), 0);
+
+            model.addAttribute("tareas",
+                    tareasPage.getContent());
+
+            model.addAttribute("paginaActual", 0);
+
+            model.addAttribute("totalPaginas",
+                    tareasPage.getTotalPages());
+
+            model.addAttribute("error",
+                    e.getMessage());
+
+            return "tareas/lista";
+        }
 
         return "redirect:/tareas";
     }

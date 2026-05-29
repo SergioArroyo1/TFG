@@ -11,5 +11,7 @@ public interface HabitoRepository extends JpaRepository<Habito, Long> {
 
     Page<Habito> findByUsuarioIdUsuario(Long idUsuario, Pageable pageable);
     List<Habito> findByUsuario_IdUsuario(Long idUsuario);
+    Page<Habito> findByUsuarioIdUsuarioAndNombreContainingIgnoreCase(Long idUsuario, String nombre, Pageable pageable);
+    long countByUsuario_IdUsuario(Long idUsuario);
 
 }

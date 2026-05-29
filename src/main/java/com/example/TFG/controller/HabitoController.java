@@ -28,20 +28,32 @@ public class HabitoController {
     // ==================================================
     // LISTAR HÁBITOS
     // ==================================================
+    // ==================================================
+// LISTAR HÁBITOS
+// ==================================================
     @GetMapping
     public String listar(@RequestParam(defaultValue = "0") int pagina,
+                         @RequestParam(required = false) String buscar,
                          @CurrentUser Usuario usuario,
                          Model model) {
 
-        Page<Habito> habitosPage =
-                service.obtenerHabitos(usuario.getIdUsuario(), pagina);
+        Page<Habito> habitosPage = service.buscarHabitosPorNombre(
+                        usuario.getIdUsuario(),
+                        buscar,
+                        pagina
+                );
 
-        model.addAttribute("habitos", habitosPage.getContent());
+        model.addAttribute("habitos",
+                habitosPage.getContent());
 
-        model.addAttribute("paginaActual", pagina);
+        model.addAttribute("paginaActual",
+                pagina);
 
         model.addAttribute("totalPaginas",
                 habitosPage.getTotalPages());
+
+        model.addAttribute("buscar",
+                buscar);
 
         return "habitos/lista";
     }
@@ -58,7 +70,11 @@ public class HabitoController {
                 service.obtenerHabitos(usuario.getIdUsuario(), pagina);
 
         String analisis =
-                iaService.analizarHabitos(habitosPage.getContent());
+                iaService.analizarHabitos(
+                        service.obtenerTodosHabitos(
+                                usuario.getIdUsuario()
+                        )
+                );
 
         model.addAttribute("habitos", habitosPage.getContent());
 
@@ -99,7 +115,28 @@ public class HabitoController {
 
         habito.setUsuario(usuario);
 
-        service.guardarHabito(habito);
+        try {
+
+            service.guardarHabito(habito);
+
+        } catch (RuntimeException e) {
+
+            Page<Habito> habitosPage =
+                    service.obtenerHabitos(usuario.getIdUsuario(), 0);
+
+            model.addAttribute("habitos",
+                    habitosPage.getContent());
+
+            model.addAttribute("paginaActual", 0);
+
+            model.addAttribute("totalPaginas",
+                    habitosPage.getTotalPages());
+
+            model.addAttribute("error",
+                    e.getMessage());
+
+            return "habitos/lista";
+        }
 
         return "redirect:/habitos";
     }

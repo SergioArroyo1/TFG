@@ -45,6 +45,23 @@ public class UsuarioService {
 
         return repo.findAll(pageable);
     }
+
+    public Page<Usuario> buscarPorNombre(
+            String nombre,
+            int pagina) {
+
+        Pageable pageable = PageRequest.of(pagina, 5);
+
+        if (nombre == null || nombre.isBlank()) {
+
+            return repo.findAll(pageable);
+        }
+
+        return repo.findByNombreContainingIgnoreCase(
+                nombre,
+                pageable
+        );
+    }
     // ======================
     // BUSCAR POR EMAIL
     // ======================

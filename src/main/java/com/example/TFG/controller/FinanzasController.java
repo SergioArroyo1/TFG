@@ -34,12 +34,17 @@ public class FinanzasController {
     @GetMapping
     public String finanzas(@CurrentUser Usuario usuario,
                            @RequestParam(defaultValue = "0") int pagina,
+                           @RequestParam(required = false) String buscar,
                            Model model) {
 
         Long usuarioId = usuario.getIdUsuario();
 
         var transaccionesPage =
-                service.obtenerTransacciones(usuarioId, pagina);
+                service.buscarTransaccionPorTitulo(
+                        usuarioId,
+                        buscar,
+                        pagina
+                );
 
         model.addAttribute("transacciones",
                 transaccionesPage.getContent());
@@ -48,6 +53,9 @@ public class FinanzasController {
 
         model.addAttribute("totalPaginas",
                 transaccionesPage.getTotalPages());
+
+        model.addAttribute("buscar",
+                buscar);
 
         model.addAttribute("categorias",
                 service.obtenerCategorias(usuarioId));
@@ -154,12 +162,73 @@ public class FinanzasController {
             model.addAttribute("categorias",
                     service.obtenerCategorias(usuarioId));
 
+            model.addAttribute("gastoCategoria",
+                    service.gastoPorCategoria(usuarioId));
+
+            model.addAttribute("porcentajeCategorias",
+                    service.porcentajeGastoPorCategoria(usuarioId));
+
+            model.addAttribute("totalIngresos",
+                    service.totalIngresos(usuarioId));
+
+            model.addAttribute("totalGastos",
+                    service.totalGastos(usuarioId));
+
+            model.addAttribute("ingresos",
+                    service.totalIngresos(usuarioId));
+
+            model.addAttribute("gastos",
+                    service.totalGastos(usuarioId));
+
+
             return "finanzas/finanzas";
         }
 
         transaccion.setUsuario(usuario);
 
-        service.guardarTransaccion(transaccion);
+        try {
+
+            service.guardarTransaccion(transaccion);
+
+        } catch (RuntimeException e) {
+
+            var transaccionesPage =
+                    service.obtenerTransacciones(usuarioId, 0);
+
+            model.addAttribute("transacciones",
+                    transaccionesPage.getContent());
+
+            model.addAttribute("paginaActual", 0);
+
+            model.addAttribute("totalPaginas",
+                    transaccionesPage.getTotalPages());
+
+            model.addAttribute("categorias",
+                    service.obtenerCategorias(usuarioId));
+
+            model.addAttribute("gastoCategoria",
+                    service.gastoPorCategoria(usuarioId));
+
+            model.addAttribute("porcentajeCategorias",
+                    service.porcentajeGastoPorCategoria(usuarioId));
+
+            model.addAttribute("totalIngresos",
+                    service.totalIngresos(usuarioId));
+
+            model.addAttribute("totalGastos",
+                    service.totalGastos(usuarioId));
+
+            model.addAttribute("ingresos",
+                    service.totalIngresos(usuarioId));
+
+            model.addAttribute("gastos",
+                    service.totalGastos(usuarioId));
+
+            model.addAttribute("error",
+                    e.getMessage());
+
+            return "finanzas/finanzas";
+        }
 
         return "redirect:/finanzas";
     }

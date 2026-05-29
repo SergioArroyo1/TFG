@@ -1,5 +1,6 @@
 package com.example.TFG.repository;
 
+import com.example.TFG.modelo.Habito;
 import com.example.TFG.modelo.Tarea;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,5 +12,7 @@ public interface TareaRepository extends JpaRepository<Tarea, Long> {
 
     Page<Tarea> findByUsuarioIdUsuario(Long idUsuario, Pageable pageable);
     List<Tarea> findByUsuario_IdUsuario(Long idUsuario);
+    Page<Tarea> findByUsuarioIdUsuarioAndTituloContainingIgnoreCase(Long idUsuario, String titulo, Pageable pageable);
+    long countByUsuario_IdUsuario(Long idUsuario);
 
 }

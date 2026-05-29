@@ -18,6 +18,10 @@ import java.util.Map;
 @Service
 public class AsistenteService {
 
+    private static final int MAX_TAREAS = 7;
+    private static final int MAX_HABITOS = 7;
+    private static final int MAX_TRANSACCIONES = 7;
+
     // ============================
     // REPOSITORIOS PRINCIPALES
     // ============================
@@ -57,6 +61,23 @@ public class AsistenteService {
     }
 
     public void guardarTarea(Tarea t) {
+
+        // Solo comprobar cuando es una tarea nueva
+        if (t.getIdTarea() == null) {
+
+            long totalTareas =
+                    tareaRepo.countByUsuario_IdUsuario(
+                            t.getUsuario().getIdUsuario()
+                    );
+
+            if (totalTareas >= MAX_TAREAS) {
+
+                throw new RuntimeException(
+                        "Has alcanzado el máximo de 7 tareas. Elimina alguna antes de crear una nueva."
+                );
+            }
+        }
+
         tareaRepo.save(t);
     }
 
@@ -79,6 +100,25 @@ public class AsistenteService {
     public List<Tarea> obtenerTodasTareas(Long idUsuario) {
         return tareaRepo.findByUsuario_IdUsuario(idUsuario);
     }
+    public Page<Tarea> buscarTareasPorTitulo(Long idUsuario, String busqueda, int pagina) {
+
+        Pageable pageable = PageRequest.of(pagina, 5);
+
+        if (busqueda == null || busqueda.isBlank()) {
+
+            return tareaRepo.findByUsuarioIdUsuario(
+                    idUsuario,
+                    pageable
+            );
+        }
+
+        return tareaRepo
+                .findByUsuarioIdUsuarioAndTituloContainingIgnoreCase(
+                        idUsuario,
+                        busqueda,
+                        pageable
+                );
+    }
 
     // ==================================================
     // HÁBITOS
@@ -91,6 +131,23 @@ public class AsistenteService {
     }
 
     public void guardarHabito(Habito h) {
+
+        // Solo comprobar cuando es un hábito nuevo
+        if (h.getIdHabito() == null) {
+
+            long totalHabitos =
+                    habitoRepo.countByUsuario_IdUsuario(
+                            h.getUsuario().getIdUsuario()
+                    );
+
+            if (totalHabitos >= MAX_HABITOS) {
+
+                throw new RuntimeException(
+                        "Has alcanzado el máximo de 7 hábitos. Elimina alguno antes de crear uno nuevo."
+                );
+            }
+        }
+
         habitoRepo.save(h);
     }
 
@@ -126,6 +183,25 @@ public class AsistenteService {
 
     public List<Habito> obtenerTodosHabitos(Long idUsuario) {
         return habitoRepo.findByUsuario_IdUsuario(idUsuario);
+    }
+    public Page<Habito> buscarHabitosPorNombre(Long idUsuario, String busqueda, int pagina) {
+
+        Pageable pageable = PageRequest.of(pagina, 5);
+
+        if (busqueda == null || busqueda.isBlank()) {
+
+            return habitoRepo.findByUsuarioIdUsuario(
+                    idUsuario,
+                    pageable
+            );
+        }
+
+        return habitoRepo
+                .findByUsuarioIdUsuarioAndNombreContainingIgnoreCase(
+                        idUsuario,
+                        busqueda,
+                        pageable
+                );
     }
 
     // ==================================================
@@ -189,6 +265,23 @@ public class AsistenteService {
     }
 
     public void guardarTransaccion(Transaccion t) {
+
+        // Solo comprobar cuando es una transacción nueva
+        if (t.getIdTransaccion() == null) {
+
+            long totalTransacciones =
+                    transaccionRepo.countByUsuario_IdUsuario(
+                            t.getUsuario().getIdUsuario()
+                    );
+
+            if (totalTransacciones >= MAX_TRANSACCIONES) {
+
+                throw new RuntimeException(
+                        "Has alcanzado el máximo de 7 transacciones. Elimina alguna antes de crear una nueva."
+                );
+            }
+        }
+
         transaccionRepo.save(t);
     }
 
@@ -207,6 +300,26 @@ public class AsistenteService {
         if (t == null || !t.getUsuario().getIdUsuario().equals(idUsuario)) {
             throw new AccessDeniedException("No tienes permiso para esta transacción");
         }
+    }
+
+    public Page<Transaccion> buscarTransaccionPorTitulo(Long idUsuario, String busqueda, int pagina) {
+
+        Pageable pageable = PageRequest.of(pagina, 5);
+
+        if (busqueda == null || busqueda.isBlank()) {
+
+            return transaccionRepo.findByUsuario_IdUsuario(
+                    idUsuario,
+                    pageable
+            );
+        }
+
+        return transaccionRepo.findByUsuarioIdUsuarioAndTituloContainingIgnoreCase(
+                idUsuario,
+                busqueda,
+                pageable
+        );
+
     }
 
     // ============================

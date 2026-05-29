@@ -2,171 +2,938 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Finanzas</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finanzas - Asistente Inteligente</title>
 
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f8f9fa;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR PRINCIPAL */
+        .main-sidebar {
+            width: 70px;
+            background: linear-gradient(180deg, #0a1f1f 0%, #0d9488 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #14b8a6, #06b6d4);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-logo:hover {
+            transform: scale(1.1);
+        }
+
+        .sidebar-logo i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .sidebar-item {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .sidebar-item.active {
+            background: rgba(20, 184, 166, 0.2);
+            color: #14b8a6;
+        }
+
+        .sidebar-item i {
+            font-size: 1.3rem;
+        }
+
+        .sidebar-bottom {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: auto;
+        }
+
+        /* PANEL LATERAL */
+        .secondary-sidebar {
+            width: 280px;
+            background: #ffffff;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .secondary-sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .secondary-sidebar-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #1f2937;
+        }
+
+        .secondary-sidebar-content {
+            padding: 15px;
+            flex: 1;
+        }
+
+        .nav-section {
+            margin-bottom: 25px;
+        }
+
+        .nav-section-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            padding: 0 10px;
+        }
+
+        .nav-item-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-item-link {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: #4b5563;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .nav-item-link:hover {
+            background: #f3f4f6;
+            color: #f59e0b;
+        }
+
+        .nav-item-link.active {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1));
+            color: #f59e0b;
+            font-weight: 600;
+        }
+
+        .nav-item-link i {
+            font-size: 1.1rem;
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 15px 0;
+        }
+
+        /* CONTENIDO PRINCIPAL */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            background: #f9fafb;
+        }
+
+        /* HEADER */
+        .content-header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title i {
+            color: #f59e0b;
+        }
+
+        .btn-ai {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-ai:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(245, 158, 11, 0.4);
+            color: white;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 15px;
+            background: #f9fafb;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .btn-logout {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: #fef2f2;
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        /* CONTENIDO */
+        .content-body {
+            padding: 30px;
+        }
+
+        /* LAYOUT COMPACTO 2 COLUMNAS */
+        .compact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .compact-left {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .compact-right {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* CARDS DE RESUMEN */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .summary-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .summary-icon.income {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .summary-icon.expense {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .summary-info {
+            flex: 1;
+        }
+
+        .summary-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .summary-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .summary-amount.income {
+            color: #10b981;
+        }
+
+        .summary-amount.expense {
+            color: #ef4444;
+        }
+
+        /* ALERTA IA */
+        .ai-alert {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #f59e0b;
+            padding: 20px 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+        }
+
+        .ai-alert-title {
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .ai-alert-content {
+            color: #b45309;
+            white-space: pre-line;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* SECCIÓN */
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: #f59e0b;
+        }
+
+        /* GRÁFICO */
+        .chart-container {
+            width: 100%;
+            max-width: 100%;
+            height: 300px;
+        }
+
+        /* PROGRESO - CON SCROLL */
+        .progress-section {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .progress-section::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .progress-section::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 10px;
+        }
+
+        .progress-section::-webkit-scrollbar-thumb {
+            background: #f59e0b;
+            border-radius: 10px;
+        }
+
+        /* BARRA DE PROGRESO DE CATEGORÍA */
+        .category-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .category-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 0.9rem;
+        }
+
+        .category-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-edit-cat {
+            padding: 5px 12px;
+            background: #fef3c7;
+            border: none;
+            border-radius: 6px;
+            color: #92400e;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit-cat:hover {
+            background: #fde68a;
+        }
+
+        .btn-delete-cat {
+            padding: 5px 12px;
+            background: #fee2e2;
+            border: none;
+            border-radius: 6px;
+            color: #991b1b;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-delete-cat:hover {
+            background: #fecaca;
+        }
+
+        .category-stats {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .progress {
+            height: 10px;
+            border-radius: 8px;
+            background: #f3f4f6;
+        }
+
+        .progress-bar {
+            border-radius: 8px;
+            transition: width 0.3s ease;
+        }
+
+        .edit-form {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 10px;
+        }
+
+        .edit-form .row {
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr;
+            gap: 10px;
+        }
+
+        /* FORMULARIOS LADO A LADO */
+        .forms-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        /* FORMULARIO */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-label i {
+            color: #f59e0b;
+            font-size: 0.95rem;
+        }
+
+        .form-control,
+        .form-select {
+            padding: 10px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+        }
+
+        .btn-create {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+            width: 100%;
+        }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            padding: 8px 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+        }
+
+        /* TABLA */
+        .table {
+            margin: 0;
+        }
+
+        .table thead {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .table thead th {
+            color: white;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            padding: 18px 20px;
+            border: none;
+        }
+
+        .table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .table tbody td {
+            padding: 16px 20px;
+            color: #4b5563;
+            font-size: 0.9rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .badge-type {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .btn-delete {
+            padding: 8px 16px;
+            background: #fee2e2;
+            border: none;
+            border-radius: 8px;
+            color: #991b1b;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-delete:hover {
+            background: #fecaca;
+            transform: translateY(-1px);
+        }
+
+        /* PAGINACIÓN */
+        .pagination-wrapper {
+            padding: 25px 0 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 8px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .page-item {
+            display: block;
+        }
+
+        .page-link {
+            padding: 10px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            color: #4b5563;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: block;
+        }
+
+        .page-link:hover {
+            background: #f9fafb;
+            border-color: #f59e0b;
+            color: #f59e0b;
+        }
+
+        .page-item.active .page-link {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-color: #f59e0b;
+            color: white;
+        }
+
+        .page-item.disabled .page-link {
+            background: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+            border-color: #e5e7eb;
+        }
+
+        .page-item.disabled .page-link:hover {
+            background: #f3f4f6;
+            border-color: #e5e7eb;
+            color: #9ca3af;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1200px) {
+            .compact-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .forms-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-sidebar {
+                width: 60px;
+            }
+
+            .secondary-sidebar {
+                position: fixed;
+                left: -280px;
+                height: 100vh;
+                z-index: 99;
+                transition: left 0.3s ease;
+            }
+
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 15px 20px;
+            }
+
+            .header-title {
+                font-size: 1.3rem;
+            }
+
+            .content-body {
+                padding: 20px;
+            }
+
+            .user-info {
+                display: none;
+            }
+
+            .table-responsive {
+                overflow-x: auto;
+            }
+        }
+    </style>
 </head>
+<body>
 
-<body class="bg-light">
+<div class="app-container">
 
-<!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
+    <!-- SIDEBAR PRINCIPAL -->
+    <div class="main-sidebar">
+        <!-- Logo AGP -->
+        <div class="sidebar-logo">
+            AGP
+        </div>
 
-        <a class="navbar-brand" th:href="@{/dashboard}">Asistente</a>
-
-        <div class="collapse navbar-collapse">
-
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" th:href="@{/dashboard}">Inicio</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/tareas}">Tareas</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/habitos}">Hábitos</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/eventos}">Calendario</a></li>
-                <li class="nav-item"><a class="nav-link active" th:href="@{/finanzas}">Finanzas</a></li>
-                <li class="nav-item" sec:authorize="hasRole('ADMIN')"><a class="nav-link" th:href="@{/admin}">Admin</a></li>
-            </ul>
-
-            <span class="navbar-text text-white me-3">
-                👤 <span sec:authentication="principal.username"></span>
-            </span>
-
-            <form th:action="@{/logout}" method="post">
-                <button class="btn btn-outline-light">Cerrar Sesión</button>
-            </form>
-
+        <div class="sidebar-nav">
+            <a th:href="@{/dashboard}" class="sidebar-item">
+                <i class="bi bi-house-door-fill"></i>
+            </a>
+            <a th:href="@{/tareas}" class="sidebar-item">
+                <i class="bi bi-list-check"></i>
+            </a>
+            <a th:href="@{/habitos}" class="sidebar-item">
+                <i class="bi bi-graph-up"></i>
+            </a>
+            <a th:href="@{/eventos}" class="sidebar-item">
+                <i class="bi bi-calendar-event"></i>
+            </a>
+            <a th:href="@{/finanzas}" class="sidebar-item active">
+                <i class="bi bi-currency-dollar"></i>
+            </a>
+            <a th:href="@{/admin}" class="sidebar-item" sec:authorize="hasRole('ADMIN')">
+                <i class="bi bi-shield-lock"></i>
+            </a>
         </div>
     </div>
-</nav>
 
-<!-- CONTENIDO -->
-<div class="container mt-4">
-
-    <h2>💰 Finanzas</h2>
-
-    <!-- IA BOTÓN -->
-    <form th:action="@{/finanzas/analizar}" method="get" class="mb-3">
-        <button class="btn btn-info">🧠 Analizar con IA</button>
-    </form>
-
-    <!-- RESUMEN -->
-    <div class="row mb-3">
-
-        <div class="col-md-6">
-            <div class="card text-center shadow border-success">
-                <div class="card-body">
-                    <h5 class="text-success">Ingresos totales</h5>
-                    <h3 th:text="${totalIngresos} + ' €'"></h3>
-                </div>
-            </div>
+    <!-- PANEL LATERAL -->
+    <div class="secondary-sidebar">
+        <div class="secondary-sidebar-header">
+            <h3 class="secondary-sidebar-title">Finanzas</h3>
         </div>
 
-        <div class="col-md-6">
-            <div class="card text-center shadow border-danger">
-                <div class="card-body">
-                    <h5 class="text-danger">Gastos totales</h5>
-                    <h3 th:text="${totalGastos} + ' €'"></h3>
-                </div>
-            </div>
-        </div>
+        <div class="secondary-sidebar-content">
+            <div class="nav-section">
+                <h4 class="nav-section-title">Vistas</h4>
+                <ul class="nav-item-list">
 
-    </div>
-
-    <!-- RESULTADO IA -->
-    <div th:if="${iaFinanzas != null}"
-         class="card shadow border-info mb-4">
-
-        <div class="card-body">
-
-            <h5 class="mb-3">🧠 IA - Análisis financiero</h5>
-
-            <div style="white-space: pre-line; font-size: 15px; line-height: 1.7;"
-                 th:text="${iaFinanzas}">
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- GRÁFICO -->
-    <div class="card p-3 mb-3">
-
-        <h5>Gasto por categoría</h5>
-
-        <div style="width: 280px; height: 280px; margin: auto;">
-            <canvas id="graficoCategorias"></canvas>
-        </div>
-
-    </div>
-
-    <!-- BARRAS DE PROGRESO -->
-    <div class="card p-3 mb-3">
-
-        <h5>Progreso por categoría</h5>
-
-        <div th:each="c : ${categorias}" class="mb-3">
-
-            <div th:with="
-                gastado=${gastoCategoria[c.idCategoria] != null ? gastoCategoria[c.idCategoria] : 0},
-                limite=${c.limiteMensual != null ? c.limiteMensual : 0},
-                ancho=${limite > 0 ? (gastado * 100 / limite) : 0}
-            ">
-
-                <div class="d-flex justify-content-between align-items-center">
-
-                    <strong th:text="${c.nombre}"></strong>
-
-                    <div>
-                        <button class="btn btn-warning btn-sm"
-                                type="button"
-                                th:onclick="'mostrarEdicion(' + ${c.idCategoria} + ')'">
-                            Editar
-                        </button>
-
-                        <a th:href="@{/finanzas/categoria/eliminar/{id}(id=${c.idCategoria})}"
-                           class="btn btn-danger btn-sm"
-                           onclick="return confirm('¿Eliminar categoría?')">
-                            Eliminar
+                    <li>
+                        <a href="#resumen" class="nav-item-link active">
+                            <i class="bi bi-layout-text-sidebar"></i>
+                            Resumen
                         </a>
+                    </li>
+
+                    <li>
+                        <a href="#grafico" class="nav-item-link">
+                            <i class="bi bi-pie-chart"></i>
+                            Gráfico
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#progreso" class="nav-item-link">
+                            <i class="bi bi-bar-chart"></i>
+                            Categorías
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#transaccion" class="nav-item-link">
+                            <i class="bi bi-arrow-left-right"></i>
+                            Nueva transacción
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#categoria" class="nav-item-link">
+                            <i class="bi bi-plus-circle"></i>
+                            Crear categoría
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#movimientos" class="nav-item-link">
+                            <i class="bi bi-list-ul"></i>
+                            Movimientos
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+            <div class="nav-divider"></div>
+
+            <!-- BUSCADOR -->
+            <div class="nav-section">
+
+                <h4 class="nav-section-title">Buscar Transacccion</h4>
+
+                <form th:action="@{/finanzas}" method="get">
+
+                    <div class="mb-3">
+
+                        <input type="text"
+                               name="buscar"
+                               class="form-control"
+                               placeholder="Buscar por titulo..."
+                               th:value="${buscar}">
+
                     </div>
 
-                </div>
+                    <button type="submit" class="btn-create w-100">
 
-                <div class="d-flex justify-content-between">
-                    <span th:text="${gastado} + ' € / ' + ${limite} + ' €'"></span>
-                </div>
+                        <i class="bi bi-search me-2"></i>
+                        Buscar
 
-                <div class="progress mt-1">
-                    <div class="progress-bar"
-                         th:classappend="${ancho >= 100} ? 'bg-danger' :
-                                          (${ancho >= 70} ? 'bg-warning' : 'bg-success')"
-                         th:style="'width:' + (${ancho > 100 ? 100 : ancho}) + '%'">
-                    </div>
-                </div>
+                    </button>
 
-                <div th:id="'editForm-' + ${c.idCategoria}" style="display:none;" class="mt-2">
-
-                    <form th:action="@{/finanzas/categoria/editar}" method="post" class="row g-2">
-
-                        <input type="hidden" name="idCategoria" th:value="${c.idCategoria}"/>
-
-                        <div class="col">
-                            <input type="text" name="nombre" th:value="${c.nombre}" class="form-control">
-                        </div>
-
-                        <div class="col">
-                            <input type="number" name="limiteMensual" th:value="${c.limiteMensual}" class="form-control">
-                        </div>
-
-                        <div class="col">
-                            <button class="btn btn-success btn-sm">Guardar</button>
-                        </div>
-
-                    </form>
-
-                </div>
+                </form>
 
             </div>
 
@@ -174,153 +941,364 @@
 
     </div>
 
-    <!-- CATEGORÍAS -->
-    <div class="card p-3 mb-3">
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
 
-        <h5>Crear categoría</h5>
-
-        <form th:action="@{/finanzas/categoria}" method="post" class="row g-2">
-
-            <div class="col">
-                <input type="text" name="nombre" class="form-control" required>
+        <!-- HEADER -->
+        <div class="content-header">
+            <div class="header-left">
+                <h1 class="header-title">
+                    <i class="bi bi-currency-dollar"></i>
+                    Finanzas
+                </h1>
+                <a th:href="@{/finanzas/analizar}" class="btn-ai">
+                    <i class="bi bi-brain"></i>
+                    Analizar con IA
+                </a>
             </div>
 
-            <div class="col">
-                <input type="number" name="limiteMensual" class="form-control" required>
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <span sec:authentication="principal.username"></span>
+                </div>
+
+                <form th:action="@{/logout}" method="post" style="margin: 0;">
+                    <button type="submit" class="btn-logout">
+                        <i class="bi bi-box-arrow-right me-1"></i>
+                        Salir
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- CONTENIDO -->
+        <div class="content-body">
+
+            <!-- ALERTA IA -->
+            <div class="ai-alert" th:if="${iaFinanzas != null}">
+                <div class="ai-alert-title">
+                    <i class="bi bi-brain"></i>
+                    Análisis de IA - Tus Finanzas
+                </div>
+                <div class="ai-alert-content" th:text="${iaFinanzas}"></div>
             </div>
 
-            <div class="col">
-                <button class="btn btn-primary w-100">Crear</button>
+
+            <!-- Mensaje de Error transacciones -->
+            <div th:if="${error}" class="alert alert-danger mb-3">
+                <span th:text="${error}"></span>
             </div>
 
-        </form>
-    </div>
+            <!-- LAYOUT COMPACTO 2 COLUMNAS -->
+            <div class="compact-grid">
 
-    <!-- TRANSACCIONES -->
-    <div class="card p-3 mb-3">
+                <!-- COLUMNA IZQUIERDA: RESUMEN + GRÁFICO -->
+                <div class="compact-left">
 
-        <h5>Nueva transacción</h5>
+                    <!-- RESUMEN -->
+                    <div id="resumen" class="summary-cards">
+                        <div class="summary-card">
+                            <div class="summary-icon income">
+                                <i class="bi bi-arrow-down-circle"></i>
+                            </div>
+                            <div class="summary-info">
+                                <div class="summary-label">Ingresos totales</div>
+                                <div class="summary-amount income" th:text="${totalIngresos} + ' €'"></div>
+                            </div>
+                        </div>
 
-        <form th:action="@{/finanzas/guardar}" method="post" class="row g-2">
+                        <div class="summary-card">
+                            <div class="summary-icon expense">
+                                <i class="bi bi-arrow-up-circle"></i>
+                            </div>
+                            <div class="summary-info">
+                                <div class="summary-label">Gastos totales</div>
+                                <div class="summary-amount expense" th:text="${totalGastos} + ' €'"></div>
+                            </div>
+                        </div>
+                    </div>
 
-            <div class="col">
-                <input type="text" name="titulo" class="form-control" required>
+                    <!-- GRÁFICO -->
+                    <div id="grafico" class="section">
+                        <h2 class="section-title">
+                            <i class="bi bi-pie-chart"></i>
+                            Gasto por categoría
+                        </h2>
+                        <div class="chart-container">
+                            <canvas id="graficoCategorias"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- COLUMNA DERECHA: PROGRESO -->
+                <div class="compact-right">
+
+                    <div id="progreso" class="section">
+                        <h2 class="section-title">
+                            <i class="bi bi-bar-chart"></i>
+                            Progreso por categoría
+                        </h2>
+
+                        <div class="progress-section">
+                            <div th:each="c : ${categorias}" class="category-item">
+
+                                <div th:with="
+                                    gastado=${gastoCategoria[c.idCategoria] != null ? gastoCategoria[c.idCategoria] : 0},
+                                    limite=${c.limiteMensual != null ? c.limiteMensual : 0},
+                                    ancho=${limite > 0 ? (gastado * 100 / limite) : 0}
+                                ">
+
+                                    <div class="category-header">
+                                        <div class="category-name" th:text="${c.nombre}"></div>
+                                        <div class="category-actions">
+                                            <button class="btn-edit-cat" type="button" th:onclick="'mostrarEdicion(' + ${c.idCategoria} + ')'">
+                                                <i class="bi bi-pencil"></i> Editar
+                                            </button>
+                                            <a th:href="@{/finanzas/categoria/eliminar/{id}(id=${c.idCategoria})}"
+                                               class="btn-delete-cat"
+                                               onclick="return confirm('¿Eliminar categoría?')">
+                                                <i class="bi bi-trash"></i> Eliminar
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div class="category-stats" th:text="${gastado} + ' € / ' + ${limite} + ' €'"></div>
+
+                                    <div class="progress">
+                                        <div class="progress-bar"
+                                             th:classappend="${ancho >= 100} ? 'bg-danger' :
+                                                              (${ancho >= 70} ? 'bg-warning' : 'bg-success')"
+                                             th:style="'width:' + (${ancho > 100 ? 100 : ancho}) + '%'">
+                                        </div>
+                                    </div>
+
+                                    <div th:id="'editForm-' + ${c.idCategoria}" class="edit-form" style="display:none;">
+                                        <form th:action="@{/finanzas/categoria/editar}" method="post">
+                                            <input type="hidden" name="idCategoria" th:value="${c.idCategoria}"/>
+                                            <div class="row">
+                                                <div>
+                                                    <label class="form-label">Nombre</label>
+                                                    <input type="text" name="nombre" th:value="${c.nombre}" class="form-control" required>
+                                                </div>
+                                                <div>
+                                                    <label class="form-label">Límite mensual (€)</label>
+                                                    <input type="number" name="limiteMensual" th:value="${c.limiteMensual}" class="form-control" required>
+                                                </div>
+                                                <div style="display: flex; align-items: end;">
+                                                    <button class="btn-success" style="width: 100%;">
+                                                        <i class="bi bi-check-circle"></i> Guardar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
 
-            <div class="col">
-                <input type="number" step="0.01" name="cantidad" class="form-control" required>
+            <!-- FORMULARIOS LADO A LADO -->
+            <div class="forms-grid">
+                <!-- NUEVA TRANSACCIÓN -->
+                <div id="transaccion" class="section">
+                    <h2 class="section-title">
+                        <i class="bi bi-arrow-left-right"></i>
+                        Nueva transacción
+                    </h2>
+
+                    <form th:action="@{/finanzas/guardar}" method="post" class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-card-heading"></i>
+                                Título
+                            </label>
+                            <input type="text" name="titulo" class="form-control" placeholder="Ej: Compra supermercado" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-currency-euro"></i>
+                                Cantidad
+                            </label>
+                            <input type="number" step="0.01" name="cantidad" class="form-control" placeholder="50.00" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-calendar3"></i>
+                                Fecha
+                            </label>
+                            <input type="date" name="fecha" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-arrow-down-up"></i>
+                                Tipo
+                            </label>
+                            <select name="tipo" class="form-select">
+                                <option value="GASTO">Gasto</option>
+                                <option value="INGRESO">Ingreso</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-tag"></i>
+                                Categoría
+                            </label>
+                            <select name="categoria.idCategoria" class="form-select">
+                                <option value="">Sin categoría</option>
+                                <option th:each="c : ${categorias}"
+                                        th:value="${c.idCategoria}"
+                                        th:text="${c.nombre}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn-create">
+                                <i class="bi bi-check-circle"></i> Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- CREAR CATEGORÍA -->
+                <div id="categoria" class="section">
+                    <h2 class="section-title">
+                        <i class="bi bi-plus-circle"></i>
+                        Crear categoría
+                    </h2>
+
+                    <form th:action="@{/finanzas/categoria}" method="post" class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-tag"></i>
+                                Nombre
+                            </label>
+                            <input type="text" name="nombre" class="form-control" placeholder="Ej: Alimentación" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-currency-euro"></i>
+                                Límite mensual
+                            </label>
+                            <input type="number" name="limiteMensual" class="form-control" placeholder="500" required>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn-create">
+                                <i class="bi bi-plus-circle"></i> Crear
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
             </div>
 
-            <div class="col">
-                <input type="date" name="fecha" class="form-control" required>
+            <!-- TABLA DE MOVIMIENTOS -->
+            <div id="movimientos" class="section">
+                <h2 class="section-title">
+                    <i class="bi bi-list-ul"></i>
+                    Movimientos
+                </h2>
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Tipo</th>
+                            <th>Cantidad</th>
+                            <th>Fecha</th>
+                            <th>Categoría</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="t : ${transacciones}">
+                            <td>
+                                <strong th:text="${t.titulo}"></strong>
+                            </td>
+                            <td>
+                                    <span class="badge-type"
+                                          th:classappend="${t.tipo.name() == 'INGRESO'} ? 'badge-ingreso' : 'badge-gasto'"
+                                          th:text="${t.tipo}">
+                                    </span>
+                            </td>
+                            <td>
+                                <strong th:text="${t.cantidad} + ' €'"></strong>
+                            </td>
+                            <td th:text="${t.fecha}"></td>
+                            <td th:text="${t.categoria != null ? t.categoria.nombre : '-'}"></td>
+                            <td>
+                                <a th:href="@{/finanzas/eliminar/{id}(id=${t.idTransaccion})}"
+                                   class="btn-delete">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PAGINACIÓN -->
+                <div class="pagination-wrapper" th:if="${totalPaginas > 1}">
+                    <ul class="pagination">
+                        <!-- ANTERIOR -->
+                        <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/finanzas(pagina=${paginaActual - 1})}">
+                                <i class="bi bi-chevron-left"></i> Anterior
+                            </a>
+                        </li>
+
+                        <!-- NÚMEROS -->
+                        <li class="page-item"
+                            th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+                            th:classappend="${i == paginaActual} ? 'active'">
+                            <a class="page-link"
+                               th:href="@{/finanzas(pagina=${i})}"
+                               th:text="${i + 1}">
+                            </a>
+                        </li>
+
+                        <!-- SIGUIENTE -->
+                        <li class="page-item" th:classappend="${paginaActual >= totalPaginas - 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/finanzas(pagina=${paginaActual + 1})}">
+                                Siguiente <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
             </div>
 
-            <div class="col">
-                <select name="tipo" class="form-select">
-                    <option value="GASTO">Gasto</option>
-                    <option value="INGRESO">Ingreso</option>
-                </select>
-            </div>
-
-            <div class="col">
-                <select name="categoria.idCategoria" class="form-select">
-                    <option value="">Sin categoría</option>
-                    <option th:each="c : ${categorias}"
-                            th:value="${c.idCategoria}"
-                            th:text="${c.nombre}">
-                    </option>
-                </select>
-            </div>
-
-            <div class="col">
-                <button class="btn btn-success w-100">Guardar</button>
-            </div>
-
-        </form>
-    </div>
-
-    <!-- LISTA -->
-    <div class="card p-3">
-
-        <h5>Movimientos</h5>
-
-        <table class="table table-striped">
-
-            <thead>
-            <tr>
-                <th>Título</th>
-                <th>Tipo</th>
-                <th>Cantidad</th>
-                <th>Fecha</th>
-                <th>Categoría</th>
-                <th></th>
-            </tr>
-            </thead>
-
-            <tbody>
-            <tr th:each="t : ${transacciones}">
-                <td th:text="${t.titulo}"></td>
-                <td th:text="${t.tipo}"></td>
-                <td th:text="${t.cantidad}"></td>
-                <td th:text="${t.fecha}"></td>
-                <td th:text="${t.categoria != null ? t.categoria.nombre : '-'}"></td>
-
-                <td>
-                    <a th:href="@{/finanzas/eliminar/{id}(id=${t.idTransaccion})}"
-                       class="btn btn-danger btn-sm">
-                        Eliminar
-                    </a>
-                </td>
-            </tr>
-            </tbody>
-
-        </table>
-        <!-- PAGINACIÓN -->
-        <nav th:if="${totalPaginas > 1}" class="mt-4">
-
-            <ul class="pagination justify-content-center">
-
-                <!-- ANTERIOR -->
-                <li class="page-item"
-                    th:classappend="${paginaActual == 0} ? 'disabled'">
-
-                    <a class="page-link"
-                       th:href="@{/finanzas(pagina=${paginaActual - 1})}">
-                        Anterior
-                    </a>
-                </li>
-
-                <!-- NÚMEROS -->
-                <li class="page-item"
-                    th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
-                    th:classappend="${i == paginaActual} ? 'active'">
-
-                    <a class="page-link"
-                       th:href="@{/finanzas(pagina=${i})}"
-                       th:text="${i + 1}">
-                    </a>
-
-                </li>
-
-                <!-- SIGUIENTE -->
-                <li class="page-item"
-                    th:classappend="${paginaActual >= totalPaginas - 1} ? 'disabled'">
-
-                    <a class="page-link"
-                       th:href="@{/finanzas(pagina=${paginaActual + 1})}">
-                        Siguiente
-                    </a>
-                </li>
-
-            </ul>
-
-        </nav>
+        </div>
 
     </div>
 
 </div>
 
-<!-- SCRIPT -->
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
+<!-- Scripts -->
 <script>
     function mostrarEdicion(id) {
         const form = document.getElementById('editForm-' + id);
@@ -342,7 +1320,17 @@
         data: {
             labels: labels,
             datasets: [{
-                data: values
+                data: values,
+                backgroundColor: [
+                    '#f59e0b',
+                    '#ef4444',
+                    '#10b981',
+                    '#3b82f6',
+                    '#8b5cf6',
+                    '#ec4899',
+                    '#14b8a6',
+                    '#f97316'
+                ]
             }]
         },
 
@@ -351,12 +1339,19 @@
         options: {
 
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
 
             plugins: {
 
                 legend: {
-                    position: 'bottom'
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            family: 'Poppins',
+                            size: 11
+                        },
+                        padding: 12
+                    }
                 },
 
                 datalabels: {
@@ -365,7 +1360,8 @@
 
                     font: {
                         weight: 'bold',
-                        size: 14
+                        size: 13,
+                        family: 'Poppins'
                     },
 
                     formatter: function(value) {

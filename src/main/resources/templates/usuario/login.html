@@ -1,50 +1,460 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
-    <title>Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!--  Bootstrap -->
+    <title>Login - AGP</title>
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+
+            font-family:'Poppins', sans-serif;
+
+            min-height:100vh;
+
+            background:
+                    linear-gradient(
+                            135deg,
+                            rgba(13,148,136,0.92) 0%,
+                            rgba(20,184,166,0.88) 50%,
+                            rgba(6,182,212,0.88) 100%
+                    );
+
+            display:flex;
+            align-items:center;
+            justify-content:center;
+
+            overflow:hidden;
+            position:relative;
+        }
+
+        /* Fondo decorativo */
+        .background-shapes{
+            position:absolute;
+            inset:0;
+            overflow:hidden;
+            z-index:0;
+        }
+
+        .shape{
+            position:absolute;
+            border-radius:50%;
+            background:rgba(255,255,255,0.08);
+        }
+
+        .shape:nth-child(1){
+            width:300px;
+            height:300px;
+            top:-100px;
+            right:-80px;
+        }
+
+        .shape:nth-child(2){
+            width:250px;
+            height:250px;
+            bottom:-90px;
+            left:-70px;
+        }
+
+        .shape:nth-child(3){
+            width:180px;
+            height:180px;
+            top:60%;
+            right:12%;
+        }
+
+        .shape:nth-child(4){
+            width:120px;
+            height:120px;
+            top:15%;
+            left:10%;
+        }
+
+        /* Card */
+        .login-container{
+            position:relative;
+            z-index:1;
+            width:100%;
+            max-width:460px;
+            padding:20px;
+        }
+
+        .login-card{
+
+            background:rgba(255,255,255,0.98);
+
+            border-radius:28px;
+
+            padding:50px 40px;
+
+            box-shadow:
+                    0 20px 60px rgba(0,0,0,0.25);
+
+            backdrop-filter: blur(12px);
+        }
+
+        /* Logo */
+        .logo-wrapper{
+            text-align:center;
+            margin-bottom:30px;
+        }
+
+        .logo-circle{
+
+            width:90px;
+            height:90px;
+
+            margin:auto;
+
+            border-radius:24px;
+
+            background:linear-gradient(
+                    135deg,
+                    #0d9488,
+                    #14b8a6,
+                    #06b6d4
+            );
+
+            display:flex;
+            align-items:center;
+            justify-content:center;
+
+            box-shadow:
+                    0 10px 25px rgba(13,148,136,0.35);
+        }
+
+        .logo-circle span{
+            color:white;
+            font-size:2rem;
+            font-weight:800;
+            letter-spacing:2px;
+        }
+
+        .title{
+
+            margin-top:20px;
+
+            font-size:2rem;
+            font-weight:800;
+
+            color:#0f172a;
+        }
+
+        .subtitle{
+
+            color:#64748b;
+            margin-top:8px;
+
+            font-size:0.95rem;
+        }
+
+        /* Error */
+        .alert-danger{
+
+            border:none;
+
+            border-radius:14px;
+
+            background:#fef2f2;
+
+            color:#dc2626;
+
+            font-weight:500;
+
+            padding:14px;
+        }
+
+        /* Labels */
+        .form-label{
+
+            font-weight:600;
+            color:#334155;
+
+            font-size:0.9rem;
+
+            margin-bottom:8px;
+        }
+
+        /* Inputs */
+        .input-group-custom{
+            position:relative;
+        }
+
+        .input-group-custom i{
+
+            position:absolute;
+
+            left:16px;
+            top:50%;
+
+            transform:translateY(-50%);
+
+            color:#94a3b8;
+
+            z-index:2;
+        }
+
+        .form-control{
+
+            border-radius:14px;
+
+            padding:14px 16px 14px 48px;
+
+            border:2px solid #e2e8f0;
+
+            transition:all .3s ease;
+        }
+
+        .form-control:focus{
+
+            border-color:#14b8a6;
+
+            box-shadow:
+                    0 0 0 4px rgba(20,184,166,0.12);
+        }
+
+        /* Botón */
+        .btn-login{
+
+            width:100%;
+
+            padding:15px;
+
+            border:none;
+
+            border-radius:14px;
+
+            background:
+                    linear-gradient(
+                            135deg,
+                            #0d9488,
+                            #14b8a6
+                    );
+
+            color:white;
+
+            font-weight:700;
+            font-size:1rem;
+
+            transition:all .3s ease;
+
+            margin-top:10px;
+
+            box-shadow:
+                    0 10px 25px rgba(13,148,136,0.30);
+        }
+
+        .btn-login:hover{
+
+            transform:translateY(-3px);
+
+            box-shadow:
+                    0 14px 35px rgba(13,148,136,0.40);
+        }
+
+        .btn-login i{
+            margin-right:8px;
+        }
+
+        /* Footer */
+        .register-link{
+
+            text-align:center;
+            margin-top:25px;
+
+            color:#64748b;
+        }
+
+        .register-link a{
+
+            color:#0d9488;
+
+            font-weight:700;
+
+            text-decoration:none;
+        }
+
+        .register-link a:hover{
+            text-decoration:underline;
+        }
+
+        .back-home{
+
+            margin-top:25px;
+            text-align:center;
+        }
+
+        .back-home a{
+
+            color:white;
+
+            text-decoration:none;
+
+            font-weight:600;
+        }
+
+        .back-home a:hover{
+            opacity:.85;
+        }
+
+        @media(max-width:576px){
+
+            .login-card{
+                padding:40px 28px;
+            }
+
+            .title{
+                font-size:1.7rem;
+            }
+        }
+
+    </style>
 </head>
-<body class="bg-light">
 
-<div class="container d-flex justify-content-center align-items-center vh-100">
+<body>
 
-    <div class="card shadow-lg p-5" style="max-width: 400px; width: 100%;">
+<!-- Fondo -->
+<div class="background-shapes">
 
-        <h2 class="text-center mb-4">Iniciar sesión</h2>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
 
-        <!--  MENSAJE DE ERROR -->
-        <div th:if="${error}" class="alert alert-danger text-center">
-            <span th:text="${error}"></span>
-        </div>
+</div>
 
-        <form th:action="@{/usuario/login}" method="post">
+<div class="login-container">
 
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input type="text" name="username" class="form-control" placeholder="correo@email.com" required>
+    <div class="login-card">
+
+        <!-- LOGO -->
+        <div class="logo-wrapper">
+
+            <div class="logo-circle">
+                <span>AGP</span>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Contraseña</label>
-                <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+            <h1 class="title">
+                Bienvenido
+            </h1>
+
+            <p class="subtitle">
+                Inicia sesión y continúa organizando tu vida
+            </p>
+
+        </div>
+
+        <!-- ERROR -->
+        <div th:if="${error}" class="alert alert-danger text-center mb-4">
+
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span th:text="${error}"></span>
+
+        </div>
+
+        <!-- FORM -->
+        <form th:action="@{/usuario/login}"
+              method="post">
+
+            <!-- EMAIL -->
+            <div class="mb-4">
+
+                <label class="form-label">
+                    Correo electrónico
+                </label>
+
+                <div class="input-group-custom">
+
+                    <i class="bi bi-envelope-fill"></i>
+
+                    <input type="text"
+                           name="username"
+                           class="form-control"
+                           placeholder="correo@email.com"
+                           required>
+
+                </div>
+
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="mb-4">
+
+                <label class="form-label">
+                    Contraseña
+                </label>
+
+                <div class="input-group-custom">
+
+                    <i class="bi bi-lock-fill"></i>
+
+                    <input type="password"
+                           name="password"
+                           class="form-control"
+                           placeholder="••••••••"
+                           required>
+
+                </div>
+
             </div>
 
             <!-- CSRF -->
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}"/>
 
-            <button type="submit" class="btn btn-primary w-100">
-                Entrar
+            <!-- BOTÓN -->
+            <button type="submit"
+                    class="btn-login">
+
+                <i class="bi bi-box-arrow-in-right"></i>
+                Iniciar Sesión
+
             </button>
 
         </form>
 
-        <div class="text-center mt-3">
-            <a th:href="@{/usuario/registro}" class="text-decoration-none">
-                ¿No tienes cuenta? Regístrate
+        <!-- Registro -->
+        <div class="register-link">
+
+            ¿No tienes cuenta?
+            <a th:href="@{/usuario/registro}">
+                Regístrate
             </a>
+
         </div>
+
+    </div>
+
+    <!-- Volver -->
+    <div class="back-home">
+
+        <a th:href="@{/}">
+            <i class="bi bi-arrow-left"></i>
+            Volver al inicio
+        </a>
 
     </div>
 
